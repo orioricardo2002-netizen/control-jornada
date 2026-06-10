@@ -31,8 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td><input type="time"></td>
                 <td><input type="time"></td>
                 <td><input type="time"></td>
-                <td>0:00</td>
-                <td>0:00</td>
+                <td class="totalHoras">0:00</td>
+                <td class="horasExtras">0:00</td>
                 <td><input type="number" step="0.01" value="0"></td>
                 <td><input type="number" step="0.01" value="0"></td>
                 <td><textarea></textarea></td>
@@ -54,5 +54,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return `${dia}/${mes}/${anio}`;
     }
+function calcularHorasFila(fila) {
 
+    const tiempos = fila.querySelectorAll('input[type="time"]');
+
+    const entradaM = tiempos[0].value;
+    const salidaM = tiempos[1].value;
+    const entradaT = tiempos[2].value;
+    const salidaT = tiempos[3].value;
+
+    let minutosTotales = 0;
+
+    minutosTotales += diferenciaMinutos(entradaM, salidaM);
+    minutosTotales += diferenciaMinutos(entradaT, salidaT);
+
+    const horas = Math.floor(minutosTotales / 60);
+    const minutos = minutosTotales % 60;
+
+    fila.querySelector(".totalHoras").textContent =
+        `${horas}:${String(minutos).padStart(2, '0')}`;
+
+    calcularExtras(fila, minutosTotales);
+}
+
+function diferenciaMinutos(inicio, fin) {
+
+    if (!inicio || !fin) return 0;
+
+    const [h1, m1] = inicio.split(":").map(Number);
+    const [h2, m2] = fin.split(":").map(Number);
+
+    return (h2 * 60 + m2) - (h1 * 60 + m1);
+}
+
+function calcularExtras(fila, minutosTotales) {
+
+    const exceso = minutosTotales - 480;
+
+    if (exceso <= 0) {
+
+        fila.querySelector(".horasExtras").textContent = "0:00";
+        return;
+    }
+
+    const bloques = Math.ceil(exceso / 30);
+
+    const extrasMinutos = bloques * 30;
+
+    const horas = Math.floor(extrasMinutos / 60);
+    const minutos = extrasMinutos % 60;
+
+    fila.querySelector(".horasExtras").textContent =
+        `${horas}:${String(minutos).padStart(2, '0')}`;
+}
 });
