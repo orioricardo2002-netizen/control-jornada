@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td class="totalHoras">0:00</td>
                 <td class="horasExtras">0:00</td>
 
-                <td><input type="number" step="0.01" value="0"></td>
-                <td><input type="number" step="0.01" value="0"></td>
+                <td><input type="number" min="0" max="99.99" step="0.01" value="0.00"></td>
+<td><input type="number" min="0" max="999" step="1" value="0"></td>
                 <td><textarea></textarea></td>
             `;
 
