@@ -64,8 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         fila.querySelectorAll('input[type="number"]').forEach(input => {
 
-            input.addEventListener("change", guardarDatos);
+            input.addEventListener("change", () => {
 
+    guardarDatos();
+
+    actualizarTotales();
+
+});
         });
 
         fila.querySelector("textarea").addEventListener("input", guardarDatos);
