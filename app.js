@@ -23,121 +23,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
         while (fecha <= fechaFin) {
 
-    const fila = document.createElement("tr");
+            const fila = document.createElement("tr");
 
-    // fila.innerHTML ...
+            fila.innerHTML = `
+                <td class="fecha">${formatearFecha(fecha)}</td>
 
-    tbody.appendChild(fila);
+                <td><input type="time"><button class="ahora">Ahora</button></td>
+                <td><input type="time"><button class="ahora">Ahora</button></td>
+                <td><input type="time"><button class="ahora">Ahora</button></td>
+                <td><input type="time"><button class="ahora">Ahora</button></td>
 
-    configurarFila(fila);
+                <td class="totalHoras">0:00</td>
+                <td class="horasExtras">0:00</td>
 
-    fecha.setDate(fecha.getDate() + 1);
-}
-            function configurarFila(fila) {
+                <td><input type="number" step="0.01" value="0"></td>
+                <td><input type="number" step="0.01" value="0"></td>
+                <td><textarea></textarea></td>
+            `;
 
-    fila.querySelectorAll('input[type="time"]').forEach(input => {
+            tbody.appendChild(fila);
 
-        input.addEventListener("change", () => {
+            configurarFila(fila);
 
-            calcularHorasFila(fila);
-            guardarDatos();
+            fecha.setDate(fecha.getDate() + 1);
+        }
+    }
 
-        });
+    function configurarFila(fila) {
 
-    });
+        fila.querySelectorAll('input[type="time"]').forEach(input => {
 
-    fila.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener("change", () => {
 
-        input.addEventListener("change", guardarDatos);
+                calcularHorasFila(fila);
+                guardarDatos();
 
-    });
-
-    fila.querySelector("textarea").addEventListener("input", guardarDatos);
-
-    fila.querySelectorAll('.ahora').forEach(btn => {
-
-        btn.addEventListener("click", () => {
-
-            const input = btn.parentElement.querySelector('input[type="time"]');
-
-            const now = new Date();
-
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-
-            input.value = `${h}:${m}`;
-
-            calcularHorasFila(fila);
-
-            guardarDatos();
-
-            guardarGPS(fila);
+            });
 
         });
 
-    });
+        fila.querySelectorAll('input[type="number"]').forEach(input => {
 
-}
-
-            calcularHorasFila(fila);
-            guardarDatos();
+            input.addEventListener("change", guardarDatos);
 
         });
 
-    });
-
-    fila.querySelectorAll('input[type="number"]').forEach(input => {
-
-        input.addEventListener("change", () => {
-
-            guardarDatos();
-
-        });
-
-    });
-
-    fila.querySelector("textarea").addEventListener("input", () => {
-
-        guardarDatos();
-
-    });
-
-    fila.querySelectorAll('.ahora').forEach(btn => {
-
-        btn.addEventListener("click", () => {
-
-            const input =
-                btn.parentElement.querySelector('input[type="time"]');
-
-            const now = new Date();
-
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-
-            input.value = `${h}:${m}`;
-
-            calcularHorasFila(fila);
-
-            guardarDatos();
-
-            guardarGPS(fila);
-
-        });
-
-    });
-
-}
-fila.querySelector("textarea").addEventListener("input", () => {
-
-    guardarDatos();
-
-});
-        });
+        fila.querySelector("textarea").addEventListener("input", guardarDatos);
 
         fila.querySelectorAll('.ahora').forEach(btn => {
+
             btn.addEventListener("click", () => {
 
-                const input = btn.parentElement.querySelector('input[type="time"]');
+                const input =
+                    btn.parentElement.querySelector('input[type="time"]');
 
                 const now = new Date();
 
@@ -148,10 +86,14 @@ fila.querySelector("textarea").addEventListener("input", () => {
 
                 calcularHorasFila(fila);
 
+                guardarDatos();
+
                 guardarGPS(fila);
 
             });
+
         });
+
     }
 
     function calcularHorasFila(fila) {
@@ -173,6 +115,7 @@ fila.querySelector("textarea").addEventListener("input", () => {
 
             minutos += diferencia(entradaM, salidaM);
             minutos += diferencia(entradaT, salidaT);
+
         }
 
         const horas = Math.floor(minutos / 60);
@@ -189,8 +132,10 @@ fila.querySelector("textarea").addEventListener("input", () => {
         const exceso = minutos - 480;
 
         if (exceso <= 0) {
+
             fila.querySelector(".horasExtras").textContent = "0:00";
             return;
+
         }
 
         const bloques = Math.ceil(exceso / 30);
@@ -237,71 +182,52 @@ fila.querySelector("textarea").addEventListener("input", () => {
 
         return `${d}/${m}/${y}`;
     }
-function guardarDatos() {
 
-    const filas = document.querySelectorAll("tbody tr");
+    function guardarDatos() {
 
-    const datos = [];
+        const filas = document.querySelectorAll("tbody tr");
 
-    filas.forEach(fila => {
+        const datos = [];
 
-        const tiempos =
-            fila.querySelectorAll('input[type="time"]');
+        filas.forEach(fila => {
 
-        const numeros =
-            fila.querySelectorAll('input[type="number"]');
+            const tiempos = fila.querySelectorAll('input[type="time"]');
+            const numeros = fila.querySelectorAll('input[type="number"]');
+            const observacion = fila.querySelector("textarea");
 
-        const observacion =
-            fila.querySelector("textarea");
+            datos.push({
 
-        datos.push({
+                fecha: fila.querySelector(".fecha").textContent,
 
-            fecha:
-                fila.querySelector(".fecha").textContent,
+                entradaM: tiempos[0].value,
+                salidaM: tiempos[1].value,
+                entradaT: tiempos[2].value,
+                salidaT: tiempos[3].value,
 
-            entradaM:
-                tiempos[0].value,
+                dieta: numeros[0].value,
+                pernocta: numeros[1].value,
 
-            salidaM:
-                tiempos[1].value,
+                observacion: observacion.value,
 
-            entradaT:
-                tiempos[2].value,
+                gps: fila.dataset.gps || ""
 
-            salidaT:
-                tiempos[3].value,
-
-            dieta:
-                numeros[0].value,
-
-            pernocta:
-                numeros[1].value,
-
-            observacion:
-                observacion.value,
-
-            gps:
-                fila.dataset.gps || ""
+            });
 
         });
 
-    });
+        localStorage.setItem(
+            "jornadaRicardo",
+            JSON.stringify(datos)
+        );
+    }
 
-    localStorage.setItem(
-        "jornadaRicardo",
-        JSON.stringify(datos)
-    );
-}
+    function cargarDatos() {
 
-function cargarDatos() {
+        const datos = localStorage.getItem("jornadaRicardo");
 
-    const datos =
-        localStorage.getItem("jornadaRicardo");
+        if (!datos) return;
 
-    if (!datos) return;
+        console.log("Datos guardados encontrados");
+    }
 
-    console.log(
-        "Datos guardados encontrados"
-    );
-}
 });
