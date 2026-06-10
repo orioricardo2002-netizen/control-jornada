@@ -182,7 +182,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return `${d}/${m}/${y}`;
     }
+function actualizarTotales() {
 
+    let minutosTrabajados = 0;
+    let minutosExtras = 0;
+
+    let totalDietas = 0;
+    let totalPernoctas = 0;
+
+    document.querySelectorAll("tbody tr").forEach(fila => {
+
+        const totalHoras =
+            fila.querySelector(".totalHoras").textContent;
+
+        const totalExtras =
+            fila.querySelector(".horasExtras").textContent;
+
+        const numeros =
+            fila.querySelectorAll('input[type="number"]');
+
+        const [h1,m1] =
+            totalHoras.split(":").map(Number);
+
+        const [h2,m2] =
+            totalExtras.split(":").map(Number);
+
+        minutosTrabajados += h1 * 60 + m1;
+        minutosExtras += h2 * 60 + m2;
+
+        totalDietas +=
+            parseFloat(numeros[0].value) || 0;
+
+        totalPernoctas +=
+            parseFloat(numeros[1].value) || 0;
+
+    });
+
+    const ht =
+        Math.floor(minutosTrabajados / 60);
+
+    const mt =
+        minutosTrabajados % 60;
+
+    const he =
+        Math.floor(minutosExtras / 60);
+
+    const me =
+        minutosExtras % 60;
+
+    document.getElementById("totalHorasTrabajadas")
+        .textContent =
+        `${ht}:${String(mt).padStart(2,'0')}`;
+
+    document.getElementById("totalHorasExtras")
+        .textContent =
+        `${he}:${String(me).padStart(2,'0')}`;
+
+    document.getElementById("totalDietas")
+        .textContent =
+        totalDietas.toFixed(2).replace(".",",");
+
+    document.getElementById("totalPernoctas")
+        .textContent =
+        totalPernoctas.toFixed(0);
+
+    document.getElementById("totalGeneral")
+        .textContent =
+        (totalDietas + totalPernoctas)
+        .toFixed(2)
+        .replace(".",",");
+
+}
     function guardarDatos() {
 
         const filas = document.querySelectorAll("tbody tr");
