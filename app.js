@@ -51,9 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function configurarFila(fila) {
 
         fila.querySelectorAll('input[type="time"]').forEach(input => {
-            input.addEventListener("change", () => {
-                calcularHorasFila(fila);
-            });
+             input.addEventListener("change", () => {
+
+    calcularHorasFila(fila);
+
+    guardarDatos();
+
+});
+
         });
 
         fila.querySelectorAll('.ahora').forEach(btn => {
