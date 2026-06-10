@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     alert("Datos guardados correctamente");
 
-    window.close();
+    alert("Datos guardados correctamente. Ya puedes cerrar la aplicación.");
 
 });
     const boton = document.querySelector("button");
@@ -283,7 +283,8 @@ function actualizarTotales() {
 
     const me =
         minutosExtras % 60;
-
+document.getElementById("totalDiasTrabajados")
+    .textContent = totalDiasTrabajados;
     document.getElementById("totalHorasTrabajadas")
         .textContent =
         `${ht}:${String(mt).padStart(2,'0')}`;
