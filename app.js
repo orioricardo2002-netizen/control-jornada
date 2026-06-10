@@ -43,31 +43,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tbody.appendChild(fila);
 
-            configurarFila(fila);
-            fecha.setDate(fecha.getDate() + 1);
-        }
-    }
+            function configurarFila(fila) {
 
-    function configurarFila(fila) {
+    fila.querySelectorAll('input[type="time"]').forEach(input => {
 
-        fila.querySelectorAll('input[type="time"]').forEach(input => {
-             input.addEventListener("change", () => {
+        input.addEventListener("change", () => {
 
-    calcularHorasFila(fila);
+            calcularHorasFila(fila);
+            guardarDatos();
 
-    guardarDatos();
+        });
 
-});
-fila.querySelectorAll('input[type="number"]').forEach(input => {
+    });
 
-    input.addEventListener("change", () => {
+    fila.querySelectorAll('input[type="number"]').forEach(input => {
+
+        input.addEventListener("change", () => {
+
+            guardarDatos();
+
+        });
+
+    });
+
+    fila.querySelector("textarea").addEventListener("input", () => {
 
         guardarDatos();
 
     });
 
-});
+    fila.querySelectorAll('.ahora').forEach(btn => {
 
+        btn.addEventListener("click", () => {
+
+            const input =
+                btn.parentElement.querySelector('input[type="time"]');
+
+            const now = new Date();
+
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+
+            input.value = `${h}:${m}`;
+
+            calcularHorasFila(fila);
+
+            guardarDatos();
+
+            guardarGPS(fila);
+
+        });
+
+    });
+
+}
 fila.querySelector("textarea").addEventListener("input", () => {
 
     guardarDatos();
