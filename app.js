@@ -58,7 +58,21 @@ document.addEventListener("DOMContentLoaded", () => {
     guardarDatos();
 
 });
+fila.querySelectorAll('input[type="number"]').forEach(input => {
 
+    input.addEventListener("change", () => {
+
+        guardarDatos();
+
+    });
+
+});
+
+fila.querySelector("textarea").addEventListener("input", () => {
+
+    guardarDatos();
+
+});
         });
 
         fila.querySelectorAll('.ahora').forEach(btn => {
