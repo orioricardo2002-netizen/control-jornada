@@ -11,76 +11,71 @@
 
 <div class="container">
 
-<h1>CONTROL DE JORNADA LABORAL</h1>
+    <h1>CONTROL DE JORNADA LABORAL</h1>
 
-<h3>Ricardo Orío Yangüela</h3>
-<p>DNI: 16635902W</p>
+    <h3>Ricardo Orío Yangüela</h3>
+    <p>DNI: 16635902W</p>
 
-<label><strong>Periodo:</strong></label>
-<input type="month" id="periodo">
+    <label><strong>Periodo:</strong></label>
+    <input type="month" id="periodo">
 
-<button>Generar Periodo 26-25</button>
-  <button id="btnSalir">Salir</button>
+    <button id="btnGenerar">Generar Periodo 26-25</button>
+    <button id="btnSalir">Salir</button>
 
-<table>
+    <table>
 
-<thead>
-<tr>
-<th>Fecha</th>
-<th>Ent. M</th>
-<th>Sal. M</th>
-<th>Ent. T</th>
-<th>Sal. T</th>
-<th>Total Horas</th>
-<th>Horas Extras</th>
-<th>Dieta €</th>
-<th>Pernocta €</th>
-<th>Observaciones</th>
-</tr>
-</thead>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Ent. M</th>
+                <th>Sal. M</th>
+                <th>Ent. T</th>
+                <th>Sal. T</th>
+                <th>Total Horas</th>
+                <th>Horas Extras</th>
+                <th>Dieta €</th>
+                <th>Pernocta €</th>
+                <th>Observaciones</th>
+            </tr>
+        </thead>
 
-<tbody>
+        <tbody>
+        </tbody>
 
-<tr>
-<td>26/06/2026</td>
-<td><input type="time"></td>
-<td><input type="time"></td>
-<td><input type="time"></td>
-<td><input type="time"></td>
-<td>0:00</td>
-<td>0:00</td>
-<td><input type="number" step="0.01"></td>
-<td><input type="number" step="0.01"></td>
-<td><textarea></textarea></td>
-</tr>
+    </table>
 
-</tbody>
+    <div class="totales">
 
-</table>
+        <p>
+            Total Días Trabajados:
+            <span id="totalDiasTrabajados">0</span>
+        </p>
 
-<div class="totales">
-<p>Total Días Trabajados:
-<span id="totalDiasTrabajados">0</span>
-</p>
-<p>Total Horas Trabajadas:
-<span id="totalHorasTrabajadas">0:00</span>
-</p>
+        <p>
+            Total Horas Trabajadas:
+            <span id="totalHorasTrabajadas">0:00</span>
+        </p>
 
-<p>Total Horas Extras:
-<span id="totalHorasExtras">0:00</span>
-</p>
+        <p>
+            Total Horas Extras:
+            <span id="totalHorasExtras">0:00</span>
+        </p>
 
-<p>Total Dietas:
-<span id="totalDietas">0,00</span> €
-</p>
+        <p>
+            Total Dietas:
+            <span id="totalDietas">0,00</span> €
+        </p>
 
-<p>Total Pernoctas:
-<span id="totalPernoctas">0</span> €
-</p>
+        <p>
+            Total Pernoctas:
+            <span id="totalPernoctas">0</span> €
+        </p>
+
+    </div>
 
 </div>
 
-</div>
 <script src="app.js"></script>
+
 </body>
 </html>
