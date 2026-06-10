@@ -202,6 +202,10 @@ function actualizarTotales() {
 
         const totalHoras =
             fila.querySelector(".totalHoras").textContent;
+        
+        if (totalHoras !== "0:00") {
+    totalDiasTrabajados++;
+}
 
         const totalExtras =
             fila.querySelector(".horasExtras").textContent;
