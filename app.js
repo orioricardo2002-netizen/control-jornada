@@ -1,15 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const btnSalir =
-    document.getElementById("btnSalir");
-    btnSalir.addEventListener("click", () => {
 
-    guardarDatos();
-
-    alert("Datos guardados correctamente");
-
-    alert("Datos guardados correctamente. Ya puedes cerrar la aplicación.");
-
-});
     const boton = document.querySelector("button");
     const tbody = document.querySelector("tbody");
 
@@ -36,50 +26,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const fila = document.createElement("tr");
 
             fila.innerHTML = `
-<td class="fecha">
-    ${formatearFecha(fecha)}
-    function nombreDia(fecha) {
+                <td class="fecha">${formatearFecha(fecha)}</td>
 
-    const dias = [
-        "Domingo",
-        "Lunes",
-        "Martes",
-        "Miércoles",
-        "Jueves",
-        "Viernes",
-        "Sábado"
-    ];
+                <td><input type="time"><button class="ahora">Ahora</button></td>
+                <td><input type="time"><button class="ahora">Ahora</button></td>
+                <td><input type="time"><button class="ahora">Ahora</button></td>
+                <td><input type="time"><button class="ahora">Ahora</button></td>
 
-    const dia = dias[fecha.getDay()];
-
-    if (dia === "Sábado" || dia === "Domingo") {
-        return dia;
-    }
-
-    return "";
-}
-    <br>
-    <small>${nombreDia(fecha)}</small>
-</td>
-
-<td><input type="time"><button class="ahora">Ahora</button></td>
-<td><input type="time"><button class="ahora">Ahora</button></td>
-<td><input type="time"><button class="ahora">Ahora</button></td>
-<td><input type="time"><button class="ahora">Ahora</button></td>
-
-<td class="totalHoras">0:00</td>
-<td class="horasExtras">0:00</td>
-
-<td><input type="number" min="0" max="99.99" step="0.01" value="0.00"></td>
-<td><input type="number" min="0" max="99" step="1" value="0"></td>
-
-<td><textarea></textarea></td>
-`;
                 <td class="totalHoras">0:00</td>
                 <td class="horasExtras">0:00</td>
 
-                <td><input type="number" min="0" max="99.99" step="0.01" value="0.00"></td>
-<td><input type="number" min="0" max="999" step="1" value="0"></td>
+                <td><input type="number" step="0.01" value="0"></td>
+                <td><input type="number" step="0.01" value="0"></td>
                 <td><textarea></textarea></td>
             `;
 
@@ -106,13 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         fila.querySelectorAll('input[type="number"]').forEach(input => {
 
-            input.addEventListener("change", () => {
+            input.addEventListener("change", guardarDatos);
 
-    guardarDatos();
-
-    actualizarTotales();
-
-});
         });
 
         fila.querySelector("textarea").addEventListener("input", guardarDatos);
@@ -172,8 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `${horas}:${String(mins).padStart(2, '0')}`;
 
         calcularExtras(fila, minutos);
-
-actualizarTotales();
     }
 
     function calcularExtras(fila, minutos) {
@@ -231,78 +182,7 @@ actualizarTotales();
 
         return `${d}/${m}/${y}`;
     }
-function actualizarTotales() {
 
-    let minutosTrabajados = 0;
-    let minutosExtras = 0;
-
-    let totalDietas = 0;
-    let totalPernoctas = 0;
-    let totalDiasTrabajados = 0;
-
-    document.querySelectorAll("tbody tr").forEach(fila => {
-
-        const totalHoras =
-            fila.querySelector(".totalHoras").textContent;
-        
-        if (totalHoras !== "0:00") {
-    totalDiasTrabajados++;
-}
-
-        const totalExtras =
-            fila.querySelector(".horasExtras").textContent;
-
-        const numeros =
-            fila.querySelectorAll('input[type="number"]');
-
-        const [h1,m1] =
-            totalHoras.split(":").map(Number);
-
-        const [h2,m2] =
-            totalExtras.split(":").map(Number);
-
-        minutosTrabajados += h1 * 60 + m1;
-        minutosExtras += h2 * 60 + m2;
-
-        totalDietas +=
-            parseFloat(numeros[0].value) || 0;
-
-        totalPernoctas +=
-            parseFloat(numeros[1].value) || 0;
-
-    });
-
-    const ht =
-        Math.floor(minutosTrabajados / 60);
-
-    const mt =
-        minutosTrabajados % 60;
-
-    const he =
-        Math.floor(minutosExtras / 60);
-
-    const me =
-        minutosExtras % 60;
-document.getElementById("totalDiasTrabajados")
-    .textContent = totalDiasTrabajados;
-    document.getElementById("totalHorasTrabajadas")
-        .textContent =
-        `${ht}:${String(mt).padStart(2,'0')}`;
-
-    document.getElementById("totalHorasExtras")
-        .textContent =
-        `${he}:${String(me).padStart(2,'0')}`;
-
-    document.getElementById("totalDietas")
-        .textContent =
-        totalDietas.toFixed(2).replace(".",",");
-
-    document.getElementById("totalPernoctas")
-        .textContent =
-        totalPernoctas.toFixed(0);
-
-
-}
     function guardarDatos() {
 
         const filas = document.querySelectorAll("tbody tr");
