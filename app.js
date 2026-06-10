@@ -70,11 +70,19 @@ function calcularHorasFila(fila) {
     const salidaM = tiempos[1].value;
     const entradaT = tiempos[2].value;
     const salidaT = tiempos[3].value;
+    if (entradaM && salidaT && !salidaM && !entradaT) {
 
-    let minutosTotales = 0;
+    minutosTotales =
+        diferenciaMinutos(entradaM, salidaT);
+
+} else {
+
+    minutosTotales = 0;
 
     minutosTotales += diferenciaMinutos(entradaM, salidaM);
+
     minutosTotales += diferenciaMinutos(entradaT, salidaT);
+}
 
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
