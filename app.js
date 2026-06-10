@@ -253,11 +253,6 @@ function actualizarTotales() {
         .textContent =
         totalPernoctas.toFixed(0);
 
-    document.getElementById("totalGeneral")
-        .textContent =
-        (totalDietas + totalPernoctas)
-        .toFixed(2)
-        .replace(".",",");
 
 }
     function guardarDatos() {
