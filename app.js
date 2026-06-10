@@ -26,7 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const fila = document.createElement("tr");
 
             fila.innerHTML = `
-                <td class="fecha">${formatearFecha(fecha)}</td>
+               <td class="fecha">
+    ${formatearFecha(fecha)}
+    <br>
+    <small>${nombreDia(fecha)}</small>
+</td>
 
                 <td><input type="time"><button class="ahora">Ahora</button></td>
                 <td><input type="time"><button class="ahora">Ahora</button></td>
