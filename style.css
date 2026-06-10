@@ -64,23 +64,67 @@ button{
     th,td{
         padding:3px;
     }
-table {
-    table-layout: auto;
-}
 
+    th:nth-child(8),
+    td:nth-child(8){
+        width:100px;
+        min-width:100px;
+    }
+
+    th:nth-child(9),
+    td:nth-child(9){
+        width:60px;
+        min-width:60px;
+    }
+
+    th:nth-child(10),
+    td:nth-child(10){
+        width:150px;
+    }
+
+    td:nth-child(8) input{
+        width:90px;
+    }
+
+    td:nth-child(9) input{
+        width:50px;
+    }
+
+    textarea{
+        min-height:50px;
+    }
+
+}
 th:nth-child(8),
-td:nth-child(8) {
-    min-width: 90px;
-    width: 90px;
+td:nth-child(8){
+    width:120px;
+    min-width:120px;
 }
 
 th:nth-child(9),
-td:nth-child(9) {
-    min-width: 90px;
-    width: 90px;
+td:nth-child(9){
+    width:70px;
+    min-width:70px;
 }
 
-td:nth-child(8) input,
-td:nth-child(9) input {
-    width: 80px;
+th:nth-child(10),
+td:nth-child(10){
+    width:180px;
+}
+
+td:nth-child(8) input{
+    width:100px;
+}
+
+td:nth-child(9) input{
+    width:55px;
+}
+
+textarea{
+    min-height:50px;
+}
+
+small{
+    font-size:10px;
+    font-weight:bold;
 }
