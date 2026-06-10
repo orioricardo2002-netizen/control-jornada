@@ -36,36 +36,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const fila = document.createElement("tr");
 
             fila.innerHTML = `
-               <td class="fecha">
+<td class="fecha">
     ${formatearFecha(fecha)}
     <br>
     <small>${nombreDia(fecha)}</small>
 </td>
-function nombreDia(fecha) {
 
-    const dias = [
-        "Domingo",
-        "Lunes",
-        "Martes",
-        "Miércoles",
-        "Jueves",
-        "Viernes",
-        "Sábado"
-    ];
+<td><input type="time"><button class="ahora">Ahora</button></td>
+<td><input type="time"><button class="ahora">Ahora</button></td>
+<td><input type="time"><button class="ahora">Ahora</button></td>
+<td><input type="time"><button class="ahora">Ahora</button></td>
 
-    const dia = dias[fecha.getDay()];
+<td class="totalHoras">0:00</td>
+<td class="horasExtras">0:00</td>
 
-    if (dia === "Sábado" || dia === "Domingo") {
-        return dia;
-    }
+<td><input type="number" min="0" max="99.99" step="0.01" value="0.00"></td>
+<td><input type="number" min="0" max="99" step="1" value="0"></td>
 
-    return "";
-}
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-
+<td><textarea></textarea></td>
+`;
                 <td class="totalHoras">0:00</td>
                 <td class="horasExtras">0:00</td>
 
