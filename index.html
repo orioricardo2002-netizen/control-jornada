@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control de Jornada</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Jornada Laboral</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -13,16 +14,34 @@
 
     <h1>CONTROL DE JORNADA LABORAL</h1>
 
-    <h3>Ricardo Orío Yangüela</h3>
-    <p>DNI: 16635902W</p>
+    <div class="datosTrabajador">
+        <h2>Ricardo Orío Yangüela</h2>
+        <p>DNI: 16635902W</p>
+    </div>
 
-    <label><strong>Periodo:</strong></label>
-    <input type="month" id="periodo">
+    <div class="controles">
 
-    <button id="btnGenerar">Generar Periodo 26-25</button>
-    <button id="btnSalir">Salir</button>
+        <label for="periodo">
+            <strong>Periodo (26 al 25):</strong>
+        </label>
 
-    <table>
+        <input type="month" id="periodo">
+
+        <button id="btnGenerar">
+            Generar Periodo
+        </button>
+
+        <button id="btnGuardar">
+            Guardar
+        </button>
+
+        <button id="btnSalir">
+            Salir
+        </button>
+
+    </div>
+
+    <table id="tablaJornada">
 
         <thead>
             <tr>
@@ -39,7 +58,7 @@
             </tr>
         </thead>
 
-        <tbody>
+        <tbody id="tablaBody">
         </tbody>
 
     </table>
@@ -48,17 +67,17 @@
 
         <p>
             Total Días Trabajados:
-            <span id="totalDiasTrabajados">0</span>
+            <span id="totalDias">0</span>
         </p>
 
         <p>
             Total Horas Trabajadas:
-            <span id="totalHorasTrabajadas">0:00</span>
+            <span id="totalHoras">0:00</span>
         </p>
 
         <p>
             Total Horas Extras:
-            <span id="totalHorasExtras">0:00</span>
+            <span id="totalExtras">0:00</span>
         </p>
 
         <p>
