@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const fila = document.createElement("tr");
 
             fila.innerHTML = `
-                <td>${formatearFecha(fecha)}</td>
+                <td class="fecha">${formatearFecha(fecha)}</td>
 
                 <td><input type="time"><button class="ahora">Ahora</button></td>
                 <td><input type="time"><button class="ahora">Ahora</button></td>
@@ -159,5 +159,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return `${d}/${m}/${y}`;
     }
+function guardarDatos() {
 
+    const filas = document.querySelectorAll("tbody tr");
+
+    const datos = [];
+
+    filas.forEach(fila => {
+
+        const tiempos =
+            fila.querySelectorAll('input[type="time"]');
+
+        const numeros =
+            fila.querySelectorAll('input[type="number"]');
+
+        const observacion =
+            fila.querySelector("textarea");
+
+        datos.push({
+
+            fecha:
+                fila.querySelector(".fecha").textContent,
+
+            entradaM:
+                tiempos[0].value,
+
+            salidaM:
+                tiempos[1].value,
+
+            entradaT:
+                tiempos[2].value,
+
+            salidaT:
+                tiempos[3].value,
+
+            dieta:
+                numeros[0].value,
+
+            pernocta:
+                numeros[1].value,
+
+            observacion:
+                observacion.value,
+
+            gps:
+                fila.dataset.gps || ""
+
+        });
+
+    });
+
+    localStorage.setItem(
+        "jornadaRicardo",
+        JSON.stringify(datos)
+    );
+}
+
+function cargarDatos() {
+
+    const datos =
+        localStorage.getItem("jornadaRicardo");
+
+    if (!datos) return;
+
+    console.log(
+        "Datos guardados encontrados"
+    );
+}
 });
