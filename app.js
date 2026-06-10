@@ -39,7 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             tbody.appendChild(fila);
+            fila.querySelectorAll('input[type="time"]').forEach(campo => {
 
+            campo.addEventListener("change", () => {
+
+        calcularHorasFila(fila);
+
+    });
+
+});
             fecha.setDate(fecha.getDate() + 1);
         }
 
