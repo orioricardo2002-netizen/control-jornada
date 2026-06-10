@@ -64,3 +64,23 @@ button{
     th,td{
         padding:3px;
     }
+table {
+    table-layout: auto;
+}
+
+th:nth-child(8),
+td:nth-child(8) {
+    min-width: 90px;
+    width: 90px;
+}
+
+th:nth-child(9),
+td:nth-child(9) {
+    min-width: 90px;
+    width: 90px;
+}
+
+td:nth-child(8) input,
+td:nth-child(9) input {
+    width: 80px;
+}
