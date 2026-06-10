@@ -2,20 +2,76 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Control de Jornada</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<h1>Control de Jornada Laboral</h1>
 
-<p>
-Ricardo Orío Yangüela<br>
-DNI: 16635902W
-</p>
+<div class="container">
 
-<p>
-La aplicación se está construyendo correctamente.
-</p>
+<h1>CONTROL DE JORNADA LABORAL</h1>
+
+<h3>Ricardo Orío Yangüela</h3>
+<p>DNI: 16635902W</p>
+
+<label><strong>Periodo:</strong></label>
+<input type="month" id="periodo">
+
+<button>Generar Periodo 26-25</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Fecha</th>
+<th>Ent. M</th>
+<th>Sal. M</th>
+<th>Ent. T</th>
+<th>Sal. T</th>
+<th>Total Horas</th>
+<th>Horas Extras</th>
+<th>Dieta €</th>
+<th>Pernocta €</th>
+<th>Observaciones</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>26/06/2026</td>
+<td><input type="time"></td>
+<td><input type="time"></td>
+<td><input type="time"></td>
+<td><input type="time"></td>
+<td>0:00</td>
+<td>0:00</td>
+<td><input type="number" step="0.01"></td>
+<td><input type="number" step="0.01"></td>
+<td><textarea></textarea></td>
+</tr>
+
+</tbody>
+
+</table>
+
+<div class="totales">
+
+<p>Total Horas Trabajadas: 0:00</p>
+
+<p>Total Horas Extras: 0:00</p>
+
+<p>Total Dietas: 0,00 €</p>
+
+<p>Total Pernoctas: 0,00 €</p>
+
+<p>Total General: 0,00 €</p>
+
+</div>
+
+</div>
 
 </body>
 </html>
