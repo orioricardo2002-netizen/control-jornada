@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-
+    const btnSalir =
+    document.getElementById("btnSalir");
     const boton = document.querySelector("button");
     const tbody = document.querySelector("tbody");
 
