@@ -66,3 +66,6 @@ button{
     }
 
 }
+td input[type="number"]{
+    width: 80px;
+}
