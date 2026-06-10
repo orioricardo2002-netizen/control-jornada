@@ -23,27 +23,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         while (fecha <= fechaFin) {
 
-            const fila = document.createElement("tr");
+    const fila = document.createElement("tr");
 
-            fila.innerHTML = `
-                <td class="fecha">${formatearFecha(fecha)}</td>
+    // fila.innerHTML ...
 
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-                <td><input type="time"><button class="ahora">Ahora</button></td>
-                <td><input type="time"><button class="ahora">Ahora</button></td>
+    tbody.appendChild(fila);
 
-                <td class="totalHoras">0:00</td>
-                <td class="horasExtras">0:00</td>
+    configurarFila(fila);
 
-                <td><input type="number" step="0.01" value="0"></td>
-                <td><input type="number" step="0.01" value="0"></td>
-                <td><textarea></textarea></td>
-            `;
-
-            tbody.appendChild(fila);
-configurarFila(fila);
-fecha.setDate(fecha.getDate() + 1);
+    fecha.setDate(fecha.getDate() + 1);
+}
             function configurarFila(fila) {
 
     fila.querySelectorAll('input[type="time"]').forEach(input => {
