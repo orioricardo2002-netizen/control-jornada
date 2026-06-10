@@ -1,6 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     const btnSalir =
     document.getElementById("btnSalir");
+    btnSalir.addEventListener("click", () => {
+
+    guardarDatos();
+
+    alert("Datos guardados correctamente");
+
+    window.close();
+
+});
     const boton = document.querySelector("button");
     const tbody = document.querySelector("tbody");
 
