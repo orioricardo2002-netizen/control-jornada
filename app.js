@@ -196,6 +196,7 @@ function actualizarTotales() {
 
     let totalDietas = 0;
     let totalPernoctas = 0;
+    let totalDiasTrabajados = 0;
 
     document.querySelectorAll("tbody tr").forEach(fila => {
 
