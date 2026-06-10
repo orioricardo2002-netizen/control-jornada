@@ -31,7 +31,26 @@ document.addEventListener("DOMContentLoaded", () => {
     <br>
     <small>${nombreDia(fecha)}</small>
 </td>
+function nombreDia(fecha) {
 
+    const dias = [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado"
+    ];
+
+    const dia = dias[fecha.getDay()];
+
+    if (dia === "Sábado" || dia === "Domingo") {
+        return dia;
+    }
+
+    return "";
+}
                 <td><input type="time"><button class="ahora">Ahora</button></td>
                 <td><input type="time"><button class="ahora">Ahora</button></td>
                 <td><input type="time"><button class="ahora">Ahora</button></td>
