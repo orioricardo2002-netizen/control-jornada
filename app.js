@@ -125,6 +125,8 @@ document.addEventListener("DOMContentLoaded", () => {
             `${horas}:${String(mins).padStart(2, '0')}`;
 
         calcularExtras(fila, minutos);
+
+actualizarTotales();
     }
 
     function calcularExtras(fila, minutos) {
