@@ -27,15 +27,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
             fila.innerHTML = `
                 <td>${formatearFecha(fecha)}</td>
-                <td><input type="time"></td>
-                <td><input type="time"></td>
-                <td><input type="time"></td>
-                <td><input type="time"></td>
+                <td>
+    <input type="time">
+    <button class="ahora">Ahora</button>
+</td>
+
+<td>
+    <input type="time">
+    <button class="ahora">Ahora</button>
+</td>
+
+<td>
+    <input type="time">
+    <button class="ahora">Ahora</button>
+</td>
+
+<td>
+    <input type="time">
+    <button class="ahora">Ahora</button>
+</td>
+fila.querySelectorAll('.ahora').forEach(boton => {
+
+    boton.addEventListener('click', () => {
+
+        const inputHora =
+            boton.parentElement.querySelector('input[type="time"]');
+
+        const ahora = new Date();
+
+        const hora =
+            String(ahora.getHours()).padStart(2, '0');
+
+        const minutos =
+            String(ahora.getMinutes()).padStart(2, '0');
+
+        inputHora.value = `${hora}:${minutos}`;
+
+        calcularHorasFila(fila);
+
+        guardarGeolocalizacion(fila);
+
+    });
+
+});
                 <td class="totalHoras">0:00</td>
                 <td class="horasExtras">0:00</td>
                 <td><input type="number" step="0.01" value="0"></td>
-                <td><input type="number" step="0.01" value="0"></td>
-                <td><textarea></textarea></td>
+                <td><input  
             `;
 
             tbody.appendChild(fila);
@@ -124,3 +162,38 @@ function calcularExtras(fila, minutosTotales) {
         `${horas}:${String(minutos).padStart(2, '0')}`;
 }
 });
+function guardarGeolocalizacion(fila) {
+
+    if (!navigator.geolocation) {
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        (posicion) => {
+
+            const datosGPS = {
+
+                latitud: posicion.coords.latitude,
+
+                longitud: posicion.coords.longitude,
+
+                fecha: new Date().toISOString()
+
+            };
+
+            fila.dataset.gps =
+                JSON.stringify(datosGPS);
+
+        },
+
+        () => {
+
+            console.log(
+                "No se pudo obtener ubicación"
+            );
+
+        }
+
+    );
+}
