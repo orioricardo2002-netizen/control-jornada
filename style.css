@@ -2,6 +2,7 @@ body{
     font-family: Arial, sans-serif;
     margin:20px;
     background:#f4f4f4;
+    color:#222;
 }
 
 .container{
@@ -23,6 +24,10 @@ h1{
     margin-bottom:20px;
 }
 
+.periodoResumen{
+    font-weight:bold;
+}
+
 .controles{
     margin-bottom:20px;
     display:flex;
@@ -32,7 +37,7 @@ h1{
 }
 
 button{
-    padding:8px 15px;
+    padding:10px 15px;
     cursor:pointer;
     border:none;
     border-radius:5px;
@@ -42,9 +47,12 @@ button{
 
 select,
 input{
-    padding:7px;
+    min-height:40px;
+    padding:8px;
     border:1px solid #bbb;
     border-radius:5px;
+    font-size:16px;
+    box-sizing:border-box;
 }
 
 #periodoAnio{
@@ -128,6 +136,8 @@ td:nth-child(10){
 textarea{
     width:100%;
     min-height:55px;
+    font-size:16px;
+    box-sizing:border-box;
     resize:vertical;
 }
 
@@ -150,43 +160,229 @@ textarea{
 /* Móvil */
 @media(max-width:768px){
     body{
-        margin:5px;
+        margin:0;
+        background:white;
     }
 
     .container{
-        padding:10px;
+        padding:12px;
+        border-radius:0;
+        box-shadow:none;
+    }
+
+    h1{
+        font-size:22px;
+        line-height:1.2;
+    }
+
+    .datosTrabajador h2{
+        font-size:18px;
+    }
+
+    .controles{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .controles label,
+    .controles button,
+    .controles select,
+    .controles input{
+        width:100%;
+    }
+
+    .controles label{
+        grid-column:1 / -1;
+    }
+
+    table,
+    thead,
+    tbody,
+    tr,
+    td{
+        display:block;
+        width:100%;
     }
 
     table{
-        font-size:11px;
+        min-width:0;
+        font-size:15px;
     }
 
-    th,td{
-        padding:2px;
+    thead{
+        display:none;
+    }
+
+    tr{
+        margin:0 0 12px;
+        border:1px solid #d5d5d5;
+        border-radius:8px;
+        background:#fff;
+        overflow:hidden;
+    }
+
+    td{
+        display:grid;
+        grid-template-columns:118px 1fr;
+        align-items:center;
+        gap:8px;
+        min-height:44px;
+        padding:8px;
+        border:0;
+        border-bottom:1px solid #eee;
+        text-align:left;
+        box-sizing:border-box;
+    }
+
+    td:last-child{
+        border-bottom:0;
+    }
+
+    td::before{
+        content:attr(data-label);
+        font-weight:bold;
+        color:#333;
     }
 
     input[type="time"]{
-        width:70px;
+        width:100%;
+    }
+
+    td:nth-child(8),
+    td:nth-child(9),
+    td:nth-child(10){
+        width:100%;
+        min-width:0;
     }
 
     td:nth-child(8) input{
-        width:75px;
+        width:100%;
     }
 
     td:nth-child(9) input{
-        width:45px;
+        width:100%;
     }
 
     textarea{
-        min-height:40px;
+        min-height:70px;
     }
 
-    button{
+    .ahora{
+        grid-column:2;
+        margin-top:6px;
         width:100%;
+        min-height:34px;
+    }
+
+    .fecha small{
+        grid-column:2;
     }
 
     select,
     #periodoAnio{
         width:100%;
+    }
+
+    .totales{
+        position:sticky;
+        bottom:0;
+        background:white;
+        border-top:2px solid #1f4e79;
+        box-shadow:0 -4px 12px rgba(0,0,0,0.08);
+        padding:10px 0 2px;
+    }
+}
+
+@media print{
+    body{
+        margin:0;
+        background:white;
+        color:black;
+    }
+
+    .container{
+        max-width:none;
+        padding:0;
+        border-radius:0;
+        box-shadow:none;
+    }
+
+    .controles,
+    .ahora,
+    #btnPrueba,
+    #btnSalir{
+        display:none !important;
+    }
+
+    h1{
+        font-size:18px;
+        margin:0 0 6px;
+    }
+
+    .datosTrabajador{
+        margin-bottom:10px;
+    }
+
+    .datosTrabajador h2,
+    .datosTrabajador p{
+        margin:3px 0;
+    }
+
+    #tablaJornada{
+        display:table;
+        overflow:visible;
+    }
+
+    table{
+        min-width:0;
+        display:table;
+        font-size:9px;
+        page-break-inside:auto;
+    }
+
+    thead{
+        display:table-header-group;
+    }
+
+    tr{
+        page-break-inside:avoid;
+    }
+
+    th,
+    td{
+        padding:3px;
+        border:1px solid #999;
+    }
+
+    input,
+    textarea,
+    select{
+        min-height:0;
+        padding:0;
+        border:0;
+        font-size:9px;
+        color:black;
+        background:transparent;
+    }
+
+    input[type="time"]{
+        width:42px;
+    }
+
+    input[type="number"]{
+        width:38px;
+    }
+
+    textarea{
+        min-height:22px;
+        resize:none;
+    }
+
+    .totales{
+        margin-top:8px;
+        padding-top:6px;
+        border-top:1px solid #999;
+        font-size:11px;
     }
 }

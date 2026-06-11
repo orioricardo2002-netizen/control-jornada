@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     const btnGenerar = document.getElementById("btnGenerar");
     const btnGuardar = document.getElementById("btnGuardar");
+    const btnPdf = document.getElementById("btnPdf");
     const btnPrueba = document.getElementById("btnPrueba");
     const btnSalir = document.getElementById("btnSalir");
     const periodoMes = document.getElementById("periodoMes");
     const periodoAnio = document.getElementById("periodoAnio");
+    const periodoActual = document.getElementById("periodoActual");
     const tbody = document.getElementById("tablaBody");
 
     btnGenerar.addEventListener("click", () => {
@@ -15,6 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
     btnGuardar.addEventListener("click", () => {
         guardarDatos();
         alert("Datos guardados correctamente");
+    });
+
+    btnPdf.addEventListener("click", () => {
+        guardarDatos();
+        window.print();
     });
 
     btnPrueba.addEventListener("click", () => {
@@ -66,44 +73,46 @@ document.addEventListener("DOMContentLoaded", () => {
         const fecha = new Date(anio, mes - 1, 26, 0, 0, 0);
         const fechaFin = new Date(anio, mes, 25, 0, 0, 0);
 
+        periodoActual.textContent = `${formatearFecha(fecha)} - ${formatearFecha(fechaFin)}`;
+
         while (fecha <= fechaFin) {
             const fila = document.createElement("tr");
             const fechaFormateada = formatearFecha(fecha);
 
             fila.dataset.fecha = fechaFormateada;
             fila.innerHTML = `
-                <td class="fecha">
+                <td class="fecha" data-label="Fecha">
                     ${fechaFormateada}
                     <br>
                     <small class="${esFinSemana(fecha) ? "fecha-fin-semana" : ""}">
                         ${nombreDia(fecha)}
                     </small>
                 </td>
-                <td>
+                <td data-label="Entrada manana">
                     <input type="time" aria-label="Entrada manana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td>
+                <td data-label="Salida manana">
                     <input type="time" aria-label="Salida manana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td>
+                <td data-label="Entrada tarde">
                     <input type="time" aria-label="Entrada tarde ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td>
+                <td data-label="Salida tarde">
                     <input type="time" aria-label="Salida tarde ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td class="totalHoras">0:00</td>
-                <td class="horasExtras">0:00</td>
-                <td>
+                <td class="totalHoras" data-label="Total horas">0:00</td>
+                <td class="horasExtras" data-label="Horas extras">0:00</td>
+                <td data-label="Dieta EUR">
                     <input type="number" min="0" max="99.99" step="0.01" value="0.00" aria-label="Dieta ${fechaFormateada}">
                 </td>
-                <td>
+                <td data-label="Pernocta EUR">
                     <input type="number" min="0" max="999" step="1" value="0" aria-label="Pernocta ${fechaFormateada}">
                 </td>
-                <td>
+                <td data-label="Observaciones">
                     <textarea aria-label="Observaciones ${fechaFormateada}"></textarea>
                 </td>
             `;
