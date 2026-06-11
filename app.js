@@ -13,6 +13,18 @@ document.addEventListener("DOMContentLoaded", () => {
         guardarDatos();
         alert("Datos guardados correctamente");
     });
+    const btnPrueba =
+document.getElementById("btnPrueba");
+
+btnPrueba.addEventListener("click", () => {
+
+    alert(
+        localStorage.getItem(
+            "jornadaRicardo"
+        )
+    );
+
+});
 
     btnSalir.addEventListener("click", () => {
         guardarDatos();
