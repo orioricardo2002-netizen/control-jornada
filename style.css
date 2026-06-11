@@ -89,12 +89,12 @@ small{
 
 th:nth-child(8),
 td:nth-child(8){
-    width:130px;
-    min-width:130px;
+    width:70px;
+    min-width:70px;
 }
 
 td:nth-child(8) input{
-    width:110px;
+    width:60px;
 }
 
 /* Pernocta más estrecha */
@@ -106,7 +106,7 @@ td:nth-child(9){
 }
 
 td:nth-child(9) input{
-    width:60px;
+    width:70px;
 }
 
 /* Observaciones más pequeña */
