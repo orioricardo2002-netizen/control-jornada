@@ -1,7 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    document.addEventListener("DOMContentLoaded", () => {
+
     cargarPeriodo();
-    cargarDatos();
+
+    setTimeout(() => {
+
+        cargarDatos();
+
+    }, 300);
     const btnGenerar = document.getElementById("btnGenerar");
     const btnGuardar = document.getElementById("btnGuardar");
     const btnSalir = document.getElementById("btnSalir");
@@ -467,24 +474,71 @@ btnPrueba.addEventListener("click", () => {
     const datos =
         JSON.parse(datosGuardados);
 
-    console.log(
-        "Datos encontrados:",
-        datos.length
-    );
+    const filas =
+        document.querySelectorAll("#tablaBody tr");
+
+    datos.forEach((dato, i) => {
+
+        if (!filas[i]) return;
+
+        const tiempos =
+            filas[i].querySelectorAll(
+                "input[type='time']"
+            );
+
+        const numeros =
+            filas[i].querySelectorAll(
+                "input[type='number']"
+            );
+
+        tiempos[0].value =
+            dato.entradaM || "";
+
+        tiempos[1].value =
+            dato.salidaM || "";
+
+        tiempos[2].value =
+            dato.entradaT || "";
+
+        tiempos[3].value =
+            dato.salidaT || "";
+
+        numeros[0].value =
+            dato.dieta || 0;
+
+        numeros[1].value =
+            dato.pernocta || 0;
+
+        filas[i].querySelector("textarea")
+            .value =
+            dato.observacion || "";
+
+        if (dato.gps) {
+            filas[i].dataset.gps =
+                dato.gps;
+        }
+
+        calcularHorasFila(
+            filas[i]
+        );
+
+    });
+
+    actualizarTotales();
 
 }
 
 function cargarPeriodo() {
 
     const periodo =
-        localStorage.getItem(
-            "periodoRicardo"
-        );
+        localStorage.getItem("periodoRicardo");
 
     if (!periodo) return;
 
-    document.getElementById("periodo")
-        .value = periodo;
+    document.getElementById("periodo").value =
+        periodo;
+
+    generarPeriodo();
 
 }
 });
