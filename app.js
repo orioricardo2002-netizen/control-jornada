@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
 
             <td>
-                <input type="number" min="0" max="99" step="1" value="0">
+                <input type="number" min="0" max="999" step="1" value="0">
             </td>
 
             <td>
