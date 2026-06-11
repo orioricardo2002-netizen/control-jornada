@@ -40,6 +40,17 @@ button{
     color:white;
 }
 
+select,
+input{
+    padding:7px;
+    border:1px solid #bbb;
+    border-radius:5px;
+}
+
+#periodoAnio{
+    width:90px;
+}
+
 button:hover{
     opacity:0.9;
 }
@@ -87,7 +98,6 @@ small{
 }
 
 /* Dietas más ancha */
-
 th:nth-child(8),
 td:nth-child(8){
     width:70px;
@@ -99,7 +109,6 @@ td:nth-child(8) input{
 }
 
 /* Pernocta más estrecha */
-
 th:nth-child(9),
 td:nth-child(9){
     width:80px;
@@ -111,7 +120,6 @@ td:nth-child(9) input{
 }
 
 /* Observaciones más pequeña */
-
 th:nth-child(10),
 td:nth-child(10){
     width:180px;
@@ -140,9 +148,7 @@ textarea{
 }
 
 /* Móvil */
-
 @media(max-width:768px){
-
     body{
         margin:5px;
     }
@@ -179,4 +185,8 @@ textarea{
         width:100%;
     }
 
+    select,
+    #periodoAnio{
+        width:100%;
+    }
 }
