@@ -18,15 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         guardarDatos();
         alert("Datos guardados correctamente");
     });
-    const btnPrueba =
-
-    alert(
-        localStorage.getItem(
-            "jornadaRicardo"
-        )
-    );
-
-});
+    
 
     btnSalir.addEventListener("click", () => {
         guardarDatos();
@@ -416,7 +408,10 @@ document.getElementById("totalHorasExtras")
             "jornadaRicardo",
             JSON.stringify(datos)
         );
-
+localStorage.setItem(
+    "periodoRicardo",
+    document.getElementById("periodo").value
+);
     }
 
     function formatearFecha(fecha) {
