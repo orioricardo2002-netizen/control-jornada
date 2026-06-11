@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Jornada Laboral</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="container">
+
     <h1>CONTROL DE JORNADA LABORAL</h1>
 
     <div class="datosTrabajador">
@@ -17,16 +20,31 @@
     </div>
 
     <div class="controles">
+
         <label for="periodo">
             <strong>Periodo (26 al 25):</strong>
         </label>
+
         <input type="month" id="periodo">
-        <button id="btnGenerar">Generar Periodo</button>
-        <button id="btnGuardar">Guardar</button>
-        <button id="btnSalir">Salir</button>
+
+        <button id="btnGenerar">
+            Generar Periodo
+        </button>
+
+        <button id="btnGuardar">
+            Guardar
+        </button>
+        
+        <button id="btnPrueba">Ver datos guardados</button>
+
+        <button id="btnSalir">
+            Salir
+        </button>
+
     </div>
 
     <table id="tablaJornada">
+
         <thead>
             <tr>
                 <th>Fecha</th>
@@ -41,18 +59,44 @@
                 <th>Observaciones</th>
             </tr>
         </thead>
-        <tbody id="tablaBody"></tbody>
+
+        <tbody id="tablaBody">
+        </tbody>
+
     </table>
 
     <div class="totales">
-        <p>Total Días Trabajados: <span id="totalDias">0</span></p>
-        <p>Total Horas Trabajadas: <span id="totalHoras">0:00</span></p>
-        <p>Total Horas Extras: <span id="totalExtras">0:00</span></p>
-        <p>Total Dietas: <span id="totalDietas">0,00</span> €</p>
-        <p>Total Pernocas: <span id="totalPernoctas">0</span> €</p>
+
+        <p>
+            Total Días Trabajados:
+            <span id="totalDias">0</span>
+        </p>
+
+        <p>
+            Total Horas Trabajadas:
+            <span id="totalHoras">0:00</span>
+        </p>
+
+        <p>
+            Total Horas Extras:
+            <span id="totalExtras">0:00</span>
+        </p>
+
+        <p>
+            Total Dietas:
+            <span id="totalDietas">0,00</span> €
+        </p>
+
+        <p>
+            Total Pernoctas:
+            <span id="totalPernoctas">0</span> €
+        </p>
+
     </div>
+
 </div>
 
 <script src="app.js"></script>
+
 </body>
 </html>
