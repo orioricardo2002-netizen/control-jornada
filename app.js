@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    document.addEventListener("DOMContentLoaded", () => {
-
     cargarPeriodo();
 
     setTimeout(() => {
@@ -21,9 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Datos guardados correctamente");
     });
     const btnPrueba =
-document.getElementById("btnPrueba");
-
-btnPrueba.addEventListener("click", () => {
 
     alert(
         localStorage.getItem(
@@ -288,15 +283,15 @@ btnPrueba.addEventListener("click", () => {
 
         });
 
-        document.getElementById("totalDias")
-            .textContent = totalDias;
+document.getElementById("totalDiasTrabajados")
+    .textContent = totalDias;
 
-        document.getElementById("totalHoras")
-            .textContent =
+document.getElementById("totalHorasTrabajadas")
+    .textContent =
             convertirMinutos(minutosTrabajados);
 
-        document.getElementById("totalExtras")
-            .textContent =
+document.getElementById("totalHorasExtras")
+    .textContent =
             convertirMinutos(minutosExtras);
 
         document.getElementById("totalDietas")
@@ -539,6 +534,10 @@ function cargarPeriodo() {
         periodo;
 
     generarPeriodo();
-
+    
+localStorage.setItem(
+    "periodoRicardo",
+    document.getElementById("periodo").value
+);
 }
 });
