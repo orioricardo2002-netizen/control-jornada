@@ -530,9 +530,6 @@ function cargarPeriodo() {
 
     generarPeriodo();
     
-localStorage.setItem(
-    "periodoRicardo",
-    document.getElementById("periodo").value
-);
+
 }
 });
