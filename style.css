@@ -86,7 +86,6 @@ small{
 }
 
 /* Dietas más ancha */
-
 th:nth-child(8),
 td:nth-child(8){
     width:70px;
@@ -98,7 +97,6 @@ td:nth-child(8) input{
 }
 
 /* Pernocta más estrecha */
-
 th:nth-child(9),
 td:nth-child(9){
     width:80px;
@@ -110,7 +108,6 @@ td:nth-child(9) input{
 }
 
 /* Observaciones más pequeña */
-
 th:nth-child(10),
 td:nth-child(10){
     width:180px;
@@ -134,9 +131,7 @@ textarea{
 }
 
 /* Móvil */
-
 @media(max-width:768px){
-
     body{
         margin:5px;
     }
@@ -172,5 +167,4 @@ textarea{
     button{
         width:100%;
     }
-
 }
