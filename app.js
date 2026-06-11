@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    cargarPeriodo();
+    cargarDatos();
     const btnGenerar = document.getElementById("btnGenerar");
     const btnGuardar = document.getElementById("btnGuardar");
     const btnSalir = document.getElementById("btnSalir");
@@ -443,4 +445,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    function cargarDatos() {
+
+    const datosGuardados =
+        localStorage.getItem("jornadaRicardo");
+
+    if (!datosGuardados) return;
+
+    const datos =
+        JSON.parse(datosGuardados);
+
+    console.log(
+        "Datos encontrados:",
+        datos.length
+    );
+
+}
+
+function cargarPeriodo() {
+
+    const periodo =
+        localStorage.getItem(
+            "periodoRicardo"
+        );
+
+    if (!periodo) return;
+
+    document.getElementById("periodo")
+        .value = periodo;
+
+}
 });
