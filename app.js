@@ -218,3 +218,229 @@ document.addEventListener("DOMContentLoaded", () => {
             .textContent =
             `${horas}:${String(mins).padStart(2, "0")}`;
     }
+        function actualizarTotales() {
+
+        let minutosTrabajados = 0;
+        let minutosExtras = 0;
+
+        let totalDietas = 0;
+        let totalPernoctas = 0;
+        let totalDias = 0;
+
+        document.querySelectorAll("#tablaBody tr")
+            .forEach(fila => {
+
+            const horas =
+                fila.querySelector(".totalHoras")
+                    .textContent;
+
+            const extras =
+                fila.querySelector(".horasExtras")
+                    .textContent;
+
+            const numeros =
+                fila.querySelectorAll(
+                    "input[type='number']"
+                );
+
+            if (horas !== "0:00") {
+                totalDias++;
+            }
+
+            const [h1,m1] =
+                horas.split(":").map(Number);
+
+            const [h2,m2] =
+                extras.split(":").map(Number);
+
+            minutosTrabajados +=
+                (h1 * 60) + m1;
+
+            minutosExtras +=
+                (h2 * 60) + m2;
+
+            totalDietas +=
+                parseFloat(numeros[0].value) || 0;
+
+            totalPernoctas +=
+                parseFloat(numeros[1].value) || 0;
+
+        });
+
+        document.getElementById("totalDias")
+            .textContent = totalDias;
+
+        document.getElementById("totalHoras")
+            .textContent =
+            convertirMinutos(minutosTrabajados);
+
+        document.getElementById("totalExtras")
+            .textContent =
+            convertirMinutos(minutosExtras);
+
+        document.getElementById("totalDietas")
+            .textContent =
+            totalDietas.toFixed(2)
+                .replace(".", ",");
+
+        document.getElementById("totalPernoctas")
+            .textContent =
+            totalPernoctas.toFixed(0);
+
+    }
+
+    function convertirMinutos(minutos) {
+
+        const horas =
+            Math.floor(minutos / 60);
+
+        const mins =
+            minutos % 60;
+
+        return `${horas}:${String(mins)
+            .padStart(2,"0")}`;
+    }
+
+    function diferenciaMinutos(inicio, fin) {
+
+        if (!inicio || !fin) return 0;
+
+        const [h1,m1] =
+            inicio.split(":").map(Number);
+
+        const [h2,m2] =
+            fin.split(":").map(Number);
+
+        return (h2 * 60 + m2)
+             - (h1 * 60 + m1);
+    }
+
+    function guardarGPS(fila) {
+
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation
+            .getCurrentPosition(pos => {
+
+            fila.dataset.gps =
+                JSON.stringify({
+
+                lat:
+                    pos.coords.latitude,
+
+                lon:
+                    pos.coords.longitude,
+
+                fecha:
+                    new Date().toISOString()
+
+            });
+
+        });
+
+    }
+
+    function guardarDatos() {
+
+        const filas =
+            document.querySelectorAll(
+                "#tablaBody tr"
+            );
+
+        const datos = [];
+
+        filas.forEach(fila => {
+
+            const tiempos =
+                fila.querySelectorAll(
+                    "input[type='time']"
+                );
+
+            const numeros =
+                fila.querySelectorAll(
+                    "input[type='number']"
+                );
+
+            datos.push({
+
+                fecha:
+                    fila.querySelector(".fecha")
+                        .textContent,
+
+                entradaM:
+                    tiempos[0].value,
+
+                salidaM:
+                    tiempos[1].value,
+
+                entradaT:
+                    tiempos[2].value,
+
+                salidaT:
+                    tiempos[3].value,
+
+                dieta:
+                    numeros[0].value,
+
+                pernocta:
+                    numeros[1].value,
+
+                observacion:
+                    fila.querySelector("textarea")
+                        .value,
+
+                gps:
+                    fila.dataset.gps || ""
+
+            });
+
+        });
+
+        localStorage.setItem(
+            "jornadaRicardo",
+            JSON.stringify(datos)
+        );
+
+    }
+
+    function formatearFecha(fecha) {
+
+        const d =
+            String(fecha.getDate())
+                .padStart(2,"0");
+
+        const m =
+            String(fecha.getMonth()+1)
+                .padStart(2,"0");
+
+        const y =
+            fecha.getFullYear();
+
+        return `${d}/${m}/${y}`;
+    }
+
+    function nombreDia(fecha) {
+
+        const dias = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado"
+        ];
+
+        return dias[fecha.getDay()];
+    }
+
+    function esFinSemana(fecha) {
+
+        return (
+            fecha.getDay() === 0 ||
+            fecha.getDay() === 6
+        );
+
+    }
+
+});
