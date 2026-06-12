@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnGuardar = document.getElementById("btnGuardar");
     const btnCargar = document.getElementById("btnCargar");
     const btnPdf = document.getElementById("btnPdf");
+    const btnLimpiarPeriodo = document.getElementById("btnLimpiarPeriodo");
     const btnLogin = document.getElementById("btnLogin");
     const btnRegistro = document.getElementById("btnRegistro");
     const btnLogout = document.getElementById("btnLogout");
@@ -38,6 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         await guardarDatos(true);
         window.print();
     });
+
+    btnLimpiarPeriodo.addEventListener("click", limpiarPeriodo);
 
     btnLogin.addEventListener("click", iniciarSesion);
     btnRegistro.addEventListener("click", crearCuenta);
@@ -135,6 +138,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert(guardadoEnNube
             ? "Datos guardados en la nube. Sesión cerrada."
             : "Sesión cerrada. No se pudo confirmar el guardado en la nube.");
+    }
+
+    async function limpiarPeriodo() {
+        const periodo = obtenerPeriodo();
+
+        if (!periodo) {
+            alert("Selecciona un periodo antes de limpiarlo.");
+            return;
+        }
+
+        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. Esta acción no se puede deshacer. ¿Continuar?`);
+
+        if (!confirmado) return;
+
+        const borradoEnNube = await borrarPeriodoEnNube(periodo);
+
+        localStorage.removeItem("jornadaRicardo");
+        localStorage.removeItem("observacionesFinalesRicardo");
+        observacionesFinales.value = "";
+        generarPeriodo();
+        guardarDatosLocales(periodo, recogerDatos(), "");
+
+        alert(borradoEnNube
+            ? "Periodo limpiado en este dispositivo y en la nube."
+            : "Periodo limpiado en este dispositivo. Si quieres borrarlo también de la nube, inicia sesión y vuelve a limpiarlo.");
     }
 
     function prepararPeriodoInicial() {
@@ -421,6 +449,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (mostrarError) {
                 alert(`No se pudo guardar en Supabase: ${error.message}`);
             }
+            return false;
+        }
+
+        return true;
+    }
+
+    async function borrarPeriodoEnNube(periodo) {
+        if (!supabaseClient || !periodo) return false;
+
+        const user = await actualizarEstadoSesion();
+        if (!user) return false;
+
+        const { error } = await supabaseClient
+            .from("jornadas")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("periodo", periodo);
+
+        if (error) {
+            alert(`No se pudo borrar el periodo en Supabase: ${error.message}`);
             return false;
         }
 

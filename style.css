@@ -85,6 +85,10 @@ button:hover{
     opacity:0.9;
 }
 
+.btnPeligro{
+    background:#9f2f2f;
+}
+
 table{
     width:100%;
     border-collapse:collapse;
