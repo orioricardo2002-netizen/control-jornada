@@ -124,8 +124,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function cerrarSesion() {
         if (!supabaseClient) return;
 
+        const datos = recogerDatos();
+        const periodo = obtenerPeriodo();
+        const guardadoEnNube = await guardarDatosEnNube(periodo, datos, false);
+
         await supabaseClient.auth.signOut();
         await actualizarEstadoSesion();
+        limpiarPantalla();
+
+        alert(guardadoEnNube
+            ? "Datos guardados en la nube. Sesión cerrada."
+            : "Sesión cerrada. No se pudo confirmar el guardado en la nube.");
     }
 
     function prepararPeriodoInicial() {
@@ -390,7 +399,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         localStorage.setItem("observacionesFinalesRicardo", observaciones);
     }
 
-    async function guardarDatosEnNube(periodo, datos) {
+    async function guardarDatosEnNube(periodo, datos, mostrarError = true) {
         if (!supabaseClient || !periodo) return false;
 
         const user = await actualizarEstadoSesion();
@@ -409,11 +418,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
         if (error) {
-            alert(`No se pudo guardar en Supabase: ${error.message}`);
+            if (mostrarError) {
+                alert(`No se pudo guardar en Supabase: ${error.message}`);
+            }
             return false;
         }
 
         return true;
+    }
+
+    function limpiarPantalla() {
+        localStorage.removeItem("jornadaRicardo");
+        localStorage.removeItem("periodoRicardo");
+        localStorage.removeItem("observacionesFinalesRicardo");
+        authPassword.value = "";
+        observacionesFinales.value = "";
+        prepararPeriodoInicial();
+        generarPeriodo();
+        actualizarTotales();
     }
 
     function cargarDatos() {
