@@ -1,8 +1,20 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    const SUPABASE_URL = "https://dpdlcrechuymojbdbtoi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_hVtiEaNhrljcdvlwGVevQg_Dn1jn5pd";
+    const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+        : null;
+
     const btnGenerar = document.getElementById("btnGenerar");
     const btnGuardar = document.getElementById("btnGuardar");
     const btnCargar = document.getElementById("btnCargar");
     const btnPdf = document.getElementById("btnPdf");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnRegistro = document.getElementById("btnRegistro");
+    const btnLogout = document.getElementById("btnLogout");
+    const authStatus = document.getElementById("authStatus");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
     const periodoMes = document.getElementById("periodoMes");
     const periodoAnio = document.getElementById("periodoAnio");
     const periodoActual = document.getElementById("periodoActual");
@@ -14,27 +26,105 @@ document.addEventListener("DOMContentLoaded", () => {
         guardarDatos();
     });
 
-    btnGuardar.addEventListener("click", () => {
-        guardarDatos();
-        alert("Datos guardados correctamente");
+    btnGuardar.addEventListener("click", async () => {
+        await guardarDatos(true);
     });
 
-    btnCargar.addEventListener("click", () => {
-        cargarPeriodo();
-        cargarDatos();
-        alert("Datos guardados cargados correctamente");
+    btnCargar.addEventListener("click", async () => {
+        await cargarDatosGuardados();
     });
 
-    btnPdf.addEventListener("click", () => {
-        guardarDatos();
+    btnPdf.addEventListener("click", async () => {
+        await guardarDatos(true);
         window.print();
     });
+
+    btnLogin.addEventListener("click", iniciarSesion);
+    btnRegistro.addEventListener("click", crearCuenta);
+    btnLogout.addEventListener("click", cerrarSesion);
 
     observacionesFinales.addEventListener("input", guardarDatos);
 
     prepararPeriodoInicial();
+    await actualizarEstadoSesion();
     cargarPeriodo();
     cargarDatos();
+
+    async function actualizarEstadoSesion() {
+        if (!supabaseClient) {
+            authStatus.textContent = "Supabase no está disponible";
+            return null;
+        }
+
+        const { data } = await supabaseClient.auth.getSession();
+        const user = data.session?.user || null;
+
+        authStatus.textContent = user
+            ? `Sesión iniciada: ${user.email}`
+            : "Sin iniciar sesión";
+
+        btnLogout.disabled = !user;
+        return user;
+    }
+
+    async function iniciarSesion() {
+        if (!supabaseClient) return;
+
+        const email = authEmail.value.trim();
+        const password = authPassword.value;
+
+        if (!email || !password) {
+            alert("Introduce email y contraseña");
+            return;
+        }
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            alert(`No se pudo iniciar sesión: ${error.message}`);
+            return;
+        }
+
+        authPassword.value = "";
+        await actualizarEstadoSesion();
+        await cargarDatosGuardados(false);
+    }
+
+    async function crearCuenta() {
+        if (!supabaseClient) return;
+
+        const email = authEmail.value.trim();
+        const password = authPassword.value;
+
+        if (!email || !password) {
+            alert("Introduce email y contraseña");
+            return;
+        }
+
+        const { error } = await supabaseClient.auth.signUp({
+            email,
+            password
+        });
+
+        if (error) {
+            alert(`No se pudo crear la cuenta: ${error.message}`);
+            return;
+        }
+
+        authPassword.value = "";
+        await actualizarEstadoSesion();
+        alert("Cuenta creada. Si Supabase te envía un email de confirmación, confírmalo antes de entrar.");
+    }
+
+    async function cerrarSesion() {
+        if (!supabaseClient) return;
+
+        await supabaseClient.auth.signOut();
+        await actualizarEstadoSesion();
+    }
 
     function prepararPeriodoInicial() {
         const hoy = new Date();
@@ -251,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function guardarDatos() {
+    function recogerDatos() {
         const filas = document.querySelectorAll("#tablaBody tr");
         const datos = [];
 
@@ -272,9 +362,54 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        return datos;
+    }
+
+    async function guardarDatos(sincronizarNube = false) {
+        const datos = recogerDatos();
+        const periodo = obtenerPeriodo();
+
+        guardarDatosLocales(periodo, datos, observacionesFinales.value);
+
+        if (!sincronizarNube) return;
+
+        const guardadoEnNube = await guardarDatosEnNube(periodo, datos);
+
+        alert(guardadoEnNube
+            ? "Datos guardados en la nube correctamente"
+            : "Datos guardados solo en este dispositivo. Inicia sesión para guardarlos en la nube.");
+    }
+
+    function guardarDatosLocales(periodo, datos, observaciones) {
         localStorage.setItem("jornadaRicardo", JSON.stringify(datos));
-        localStorage.setItem("periodoRicardo", obtenerPeriodo());
-        localStorage.setItem("observacionesFinalesRicardo", observacionesFinales.value);
+        localStorage.setItem("periodoRicardo", periodo);
+        localStorage.setItem("observacionesFinalesRicardo", observaciones);
+    }
+
+    async function guardarDatosEnNube(periodo, datos) {
+        if (!supabaseClient || !periodo) return false;
+
+        const user = await actualizarEstadoSesion();
+        if (!user) return false;
+
+        const { error } = await supabaseClient
+            .from("jornadas")
+            .upsert({
+                user_id: user.id,
+                periodo,
+                datos,
+                observaciones_finales: observacionesFinales.value,
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: "user_id,periodo"
+            });
+
+        if (error) {
+            alert(`No se pudo guardar en Supabase: ${error.message}`);
+            return false;
+        }
+
+        return true;
     }
 
     function cargarDatos() {
@@ -316,6 +451,48 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         actualizarTotales();
+    }
+
+    async function cargarDatosGuardados(mostrarAviso = true) {
+        const cargadoDeNube = await cargarDatosDesdeNube();
+
+        if (!cargadoDeNube) {
+            cargarPeriodo();
+            cargarDatos();
+        }
+
+        if (mostrarAviso) {
+            alert(cargadoDeNube
+                ? "Datos cargados desde la nube"
+                : "Datos cargados desde este dispositivo. Inicia sesión para cargar desde la nube.");
+        }
+    }
+
+    async function cargarDatosDesdeNube() {
+        if (!supabaseClient) return false;
+
+        const user = await actualizarEstadoSesion();
+        const periodo = obtenerPeriodo();
+
+        if (!user || !periodo) return false;
+
+        const { data, error } = await supabaseClient
+            .from("jornadas")
+            .select("datos, observaciones_finales")
+            .eq("user_id", user.id)
+            .eq("periodo", periodo)
+            .maybeSingle();
+
+        if (error) {
+            alert(`No se pudo cargar desde Supabase: ${error.message}`);
+            return false;
+        }
+
+        if (!data) return false;
+
+        guardarDatosLocales(periodo, data.datos || [], data.observaciones_finales || "");
+        cargarDatos();
+        return true;
     }
 
     function cargarPeriodo() {

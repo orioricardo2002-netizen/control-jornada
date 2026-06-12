@@ -17,6 +17,15 @@
         <p class="periodoResumen">Periodo: <span id="periodoActual">Sin generar</span></p>
     </div>
 
+    <div class="authPanel">
+        <p id="authStatus">Sin iniciar sesión</p>
+        <input type="email" id="authEmail" placeholder="Email" autocomplete="email" aria-label="Email">
+        <input type="password" id="authPassword" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña">
+        <button id="btnLogin" type="button">Entrar</button>
+        <button id="btnRegistro" type="button">Crear cuenta</button>
+        <button id="btnLogout" type="button">Cerrar sesión</button>
+    </div>
+
     <div class="controles">
         <label for="periodoMes">
             <strong>Periodo (26 al 25):</strong>
@@ -74,6 +83,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
 </body>
 </html>

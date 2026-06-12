@@ -28,6 +28,28 @@ h1{
     font-weight:bold;
 }
 
+.authPanel{
+    margin-bottom:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#f8fafc;
+}
+
+.authPanel p{
+    width:100%;
+    margin:0;
+    font-weight:bold;
+}
+
+.authPanel input{
+    min-width:220px;
+}
+
 .controles{
     margin-bottom:20px;
     display:flex;
@@ -226,6 +248,16 @@ textarea{
         gap:10px;
     }
 
+    .authPanel{
+        display:grid;
+        grid-template-columns:1fr;
+    }
+
+    .authPanel input,
+    .authPanel button{
+        width:100%;
+    }
+
     .controles label,
     .controles button,
     .controles select,
@@ -287,6 +319,7 @@ textarea{
         box-shadow:none;
     }
 
+    .authPanel,
     .controles,
     .ahora{
         display:none !important;
