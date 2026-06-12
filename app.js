@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const btnGenerar = document.getElementById("btnGenerar");
     const btnGuardar = document.getElementById("btnGuardar");
+    const btnCargar = document.getElementById("btnCargar");
     const btnPdf = document.getElementById("btnPdf");
-    const btnPrueba = document.getElementById("btnPrueba");
-    const btnSalir = document.getElementById("btnSalir");
     const periodoMes = document.getElementById("periodoMes");
     const periodoAnio = document.getElementById("periodoAnio");
     const periodoActual = document.getElementById("periodoActual");
@@ -20,19 +19,15 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Datos guardados correctamente");
     });
 
+    btnCargar.addEventListener("click", () => {
+        cargarPeriodo();
+        cargarDatos();
+        alert("Datos guardados cargados correctamente");
+    });
+
     btnPdf.addEventListener("click", () => {
         guardarDatos();
         window.print();
-    });
-
-    btnPrueba.addEventListener("click", () => {
-        const datos = localStorage.getItem("jornadaRicardo");
-        alert(datos ? datos : "No hay datos guardados todavia.");
-    });
-
-    btnSalir.addEventListener("click", () => {
-        guardarDatos();
-        alert("Datos guardados. Ya puedes cerrar la aplicacion.");
     });
 
     observacionesFinales.addEventListener("input", guardarDatos);

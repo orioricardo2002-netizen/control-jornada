@@ -288,9 +288,7 @@ textarea{
     }
 
     .controles,
-    .ahora,
-    #btnPrueba,
-    #btnSalir{
+    .ahora{
         display:none !important;
     }
 
