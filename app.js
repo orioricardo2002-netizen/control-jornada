@@ -43,7 +43,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnRegistro.addEventListener("click", crearCuenta);
     btnLogout.addEventListener("click", cerrarSesion);
 
-    observacionesFinales.addEventListener("input", guardarDatos);
+    observacionesFinales.addEventListener("input", () => {
+        guardarDatos();
+    });
 
     prepararPeriodoInicial();
     await actualizarEstadoSesion();
@@ -228,7 +230,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         });
 
-        fila.querySelector("textarea").addEventListener("input", guardarDatos);
+        fila.querySelector("textarea").addEventListener("input", () => {
+            guardarDatos();
+        });
 
         fila.querySelectorAll(".ahora").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -464,7 +468,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (mostrarAviso) {
             alert(cargadoDeNube
                 ? "Datos cargados desde la nube"
-                : "Datos cargados desde este dispositivo. Inicia sesión para cargar desde la nube.");
+                : "Datos cargados desde este dispositivo. Para cargar desde la nube, inicia sesión en este navegador y asegúrate de haber seleccionado un periodo guardado.");
         }
     }
 
