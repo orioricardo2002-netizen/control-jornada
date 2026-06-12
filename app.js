@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const periodoMes = document.getElementById("periodoMes");
     const periodoAnio = document.getElementById("periodoAnio");
     const periodoActual = document.getElementById("periodoActual");
+    const observacionesFinales = document.getElementById("observacionesFinales");
     const tbody = document.getElementById("tablaBody");
 
     btnGenerar.addEventListener("click", () => {
@@ -33,6 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
         guardarDatos();
         alert("Datos guardados. Ya puedes cerrar la aplicacion.");
     });
+
+    observacionesFinales.addEventListener("input", guardarDatos);
 
     prepararPeriodoInicial();
     cargarPeriodo();
@@ -276,9 +279,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         localStorage.setItem("jornadaRicardo", JSON.stringify(datos));
         localStorage.setItem("periodoRicardo", obtenerPeriodo());
+        localStorage.setItem("observacionesFinalesRicardo", observacionesFinales.value);
     }
 
     function cargarDatos() {
+        observacionesFinales.value = localStorage.getItem("observacionesFinalesRicardo") || "";
+
         const datosGuardados = localStorage.getItem("jornadaRicardo");
         if (!datosGuardados) return;
 
