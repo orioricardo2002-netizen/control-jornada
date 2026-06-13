@@ -50,12 +50,131 @@ h1{
     min-width:220px;
 }
 
-.controles{
-    margin-bottom:20px;
+.mesesTabsPanel{
+    margin-bottom:18px;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#f8fafc;
+}
+
+.btnMesesMenu,
+.btnAccionesMenu{
     display:flex;
-    flex-wrap:wrap;
-    gap:10px;
     align-items:center;
+    gap:10px;
+    width:100%;
+    justify-content:flex-start;
+}
+
+.btnMenuIcono{
+    display:block;
+    width:18px;
+    height:2px;
+    background:currentColor;
+    position:relative;
+}
+
+.btnMenuIcono::before,
+.btnMenuIcono::after{
+    content:"";
+    position:absolute;
+    left:0;
+    width:18px;
+    height:2px;
+    background:currentColor;
+}
+
+.btnMenuIcono::before{
+    top:-6px;
+}
+
+.btnMenuIcono::after{
+    top:6px;
+}
+
+.mesesTabs{
+    display:none;
+    gap:8px;
+}
+
+.mesesTabsPanel.abierto .mesesTabs{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    margin-top:12px;
+}
+
+.mesTab{
+    background:#e7eef5;
+    color:#1f4e79;
+    border:1px solid #b8c8d8;
+    width:100%;
+}
+
+.mesTab.activa{
+    background:#1f4e79;
+    color:white;
+}
+
+.accionesPanel{
+    margin-bottom:20px;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#f8fafc;
+}
+
+.accionesMenu{
+    display:none;
+    flex-direction:column;
+    gap:10px;
+    margin-top:12px;
+}
+
+.accionesPanel.abierto .accionesMenu{
+    display:flex;
+}
+
+.accionesMenu button{
+    width:100%;
+}
+
+@media(min-width:769px){
+    .btnAccionesMenu,
+    .btnMesesMenu{
+        display:none;
+    }
+
+    .mesesTabsPanel.abierto .mesesTabs,
+    .mesesTabs{
+        display:flex;
+        flex-wrap:wrap;
+        margin-top:0;
+        grid-template-columns:none;
+    }
+
+    .mesTab{
+        width:auto;
+    }
+
+    .accionesPanel{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        align-items:center;
+    }
+
+    .accionesMenu{
+        display:flex;
+        flex-direction:row;
+        flex-wrap:wrap;
+        margin-top:0;
+        gap:10px;
+    }
+
+    .accionesMenu button{
+        width:auto;
+    }
 }
 
 button{
@@ -246,12 +365,6 @@ textarea{
         font-size:18px;
     }
 
-    .controles{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:10px;
-    }
-
     .authPanel{
         display:grid;
         grid-template-columns:1fr;
@@ -260,17 +373,6 @@ textarea{
     .authPanel input,
     .authPanel button{
         width:100%;
-    }
-
-    .controles label,
-    .controles button,
-    .controles select,
-    .controles input{
-        width:100%;
-    }
-
-    .controles label{
-        grid-column:1 / -1;
     }
 
     table{
@@ -297,11 +399,6 @@ textarea{
         min-height:24px;
     }
 
-    select,
-    #periodoAnio{
-        width:100%;
-    }
-
     .totales{
         background:white;
         border-top:2px solid #1f4e79;
@@ -324,7 +421,9 @@ textarea{
     }
 
     .authPanel,
-    .controles,
+    .accionesPanel,
+    .controlesOcultos,
+    .mesesTabsPanel,
     .ahora{
         display:none !important;
     }

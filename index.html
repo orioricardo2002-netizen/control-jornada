@@ -26,10 +26,30 @@
         <button id="btnLogout" type="button">Cerrar sesión</button>
     </div>
 
-    <div class="controles">
-        <label for="periodoMes">
-            <strong>Periodo (26 al 25):</strong>
-        </label>
+    <div class="mesesTabsPanel" aria-label="Año 2026">
+        <button id="btnMesesMenu" type="button" class="btnMesesMenu"
+                aria-expanded="false" aria-controls="mesesTabs">
+            <span class="btnMenuIcono" aria-hidden="true"></span>
+            <span id="mesesMenuTitulo">Año 2026</span>
+        </button>
+        <div id="mesesTabs" class="mesesTabs"></div>
+    </div>
+
+    <div class="accionesPanel">
+        <button id="btnAccionesMenu" type="button" class="btnAccionesMenu"
+                aria-expanded="false" aria-controls="accionesMenu">
+            <span class="btnMenuIcono" aria-hidden="true"></span>
+            <span>Acciones</span>
+        </button>
+        <div id="accionesMenu" class="accionesMenu">
+            <button id="btnGuardar" type="button">Guardar</button>
+            <button id="btnCargar" type="button">Cargar datos guardados</button>
+            <button id="btnPdf" type="button">PDF del periodo</button>
+            <button id="btnLimpiarPeriodo" type="button" class="btnPeligro">Limpiar periodo</button>
+        </div>
+    </div>
+
+    <div class="controlesOcultos" hidden>
         <select id="periodoMes" aria-label="Mes del periodo">
             <option value="">Mes</option>
             <option value="01">Enero</option>
@@ -46,11 +66,6 @@
             <option value="12">Diciembre</option>
         </select>
         <input type="number" id="periodoAnio" min="2000" max="2100" step="1" placeholder="Año" aria-label="Año del periodo">
-        <button id="btnGenerar">Generar Periodo</button>
-        <button id="btnGuardar">Guardar</button>
-        <button id="btnCargar">Cargar datos guardados</button>
-        <button id="btnPdf">PDF del periodo</button>
-        <button id="btnLimpiarPeriodo" class="btnPeligro">Limpiar periodo</button>
     </div>
 
     <table id="tablaJornada">

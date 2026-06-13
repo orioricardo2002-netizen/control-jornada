@@ -5,11 +5,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
         : null;
 
-    const btnGenerar = document.getElementById("btnGenerar");
     const btnGuardar = document.getElementById("btnGuardar");
     const btnCargar = document.getElementById("btnCargar");
     const btnPdf = document.getElementById("btnPdf");
     const btnLimpiarPeriodo = document.getElementById("btnLimpiarPeriodo");
+    const btnAccionesMenu = document.getElementById("btnAccionesMenu");
+    const accionesMenu = document.getElementById("accionesMenu");
+    const accionesPanel = document.querySelector(".accionesPanel");
+    const btnMesesMenu = document.getElementById("btnMesesMenu");
+    const mesesMenuTitulo = document.getElementById("mesesMenuTitulo");
+    const mesesTabsPanel = document.querySelector(".mesesTabsPanel");
     const btnLogin = document.getElementById("btnLogin");
     const btnRegistro = document.getElementById("btnRegistro");
     const btnLogout = document.getElementById("btnLogout");
@@ -21,10 +26,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     const periodoActual = document.getElementById("periodoActual");
     const observacionesFinales = document.getElementById("observacionesFinales");
     const tbody = document.getElementById("tablaBody");
+    const mesesTabs = document.getElementById("mesesTabs");
+    const meses2026 = [
+        { valor: "01", texto: "Ene" },
+        { valor: "02", texto: "Feb" },
+        { valor: "03", texto: "Mar" },
+        { valor: "04", texto: "Abr" },
+        { valor: "05", texto: "May" },
+        { valor: "06", texto: "Jun" },
+        { valor: "07", texto: "Jul" },
+        { valor: "08", texto: "Ago" },
+        { valor: "09", texto: "Sep" },
+        { valor: "10", texto: "Oct" },
+        { valor: "11", texto: "Nov" },
+        { valor: "12", texto: "Dic" }
+    ];
+    const STORAGE_JORNADAS = "jornadasPorPeriodo";
+    const STORAGE_PERIODO_ACTIVO = "periodoActivo";
+    let periodoEnPantalla = "";
 
-    btnGenerar.addEventListener("click", () => {
-        generarPeriodo();
-        guardarDatos();
+    btnAccionesMenu.addEventListener("click", () => {
+        const abierto = accionesPanel.classList.toggle("abierto");
+        btnAccionesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
+    });
+
+    btnMesesMenu.addEventListener("click", () => {
+        const abierto = mesesTabsPanel.classList.toggle("abierto");
+        btnMesesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
+    });
+
+    accionesMenu.querySelectorAll("button").forEach(boton => {
+        boton.addEventListener("click", () => {
+            accionesPanel.classList.remove("abierto");
+            btnAccionesMenu.setAttribute("aria-expanded", "false");
+        });
     });
 
     btnGuardar.addEventListener("click", async () => {
@@ -50,10 +85,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         guardarDatos();
     });
 
-    prepararPeriodoInicial();
+    periodoMes.addEventListener("change", () => cambiarMesActivo());
+    periodoAnio.addEventListener("input", () => cambiarMesActivo());
+
+    migrarStorageAntiguo();
+    crearPestanasMeses();
+    iniciarPeriodo();
     await actualizarEstadoSesion();
-    cargarPeriodo();
-    cargarDatos();
 
     async function actualizarEstadoSesion() {
         if (!supabaseClient) {
@@ -154,8 +192,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const borradoEnNube = await borrarPeriodoEnNube(periodo);
 
-        localStorage.removeItem("jornadaRicardo");
-        localStorage.removeItem("observacionesFinalesRicardo");
+        const mapa = leerJornadasPorPeriodo();
+        delete mapa[periodo];
+        localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
         observacionesFinales.value = "";
         generarPeriodo();
         guardarDatosLocales(periodo, recogerDatos(), "");
@@ -165,10 +204,95 @@ document.addEventListener("DOMContentLoaded", async () => {
             : "Periodo limpiado en este dispositivo. Si quieres borrarlo también de la nube, inicia sesión y vuelve a limpiarlo.");
     }
 
-    function prepararPeriodoInicial() {
-        const hoy = new Date();
-        periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
-        periodoAnio.value = hoy.getFullYear();
+    function migrarStorageAntiguo() {
+        if (localStorage.getItem(STORAGE_JORNADAS)) return;
+
+        const periodoViejo = localStorage.getItem("periodoRicardo");
+        const datosViejos = localStorage.getItem("jornadaRicardo");
+
+        if (!periodoViejo || !datosViejos) return;
+
+        try {
+            const mapa = {
+                [periodoViejo]: {
+                    datos: JSON.parse(datosViejos),
+                    observaciones: localStorage.getItem("observacionesFinalesRicardo") || ""
+                }
+            };
+
+            localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
+            localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoViejo);
+        } catch (error) {
+            console.error("No se pudieron migrar los datos guardados", error);
+        }
+    }
+
+    function leerJornadasPorPeriodo() {
+        const raw = localStorage.getItem(STORAGE_JORNADAS);
+
+        if (!raw) return {};
+
+        try {
+            return JSON.parse(raw);
+        } catch (error) {
+            console.error("No se pudieron leer los periodos guardados", error);
+            return {};
+        }
+    }
+
+    function obtenerDatosPeriodo(periodo) {
+        if (!periodo) return null;
+
+        return leerJornadasPorPeriodo()[periodo] || null;
+    }
+
+    function iniciarPeriodo() {
+        const periodoGuardado = localStorage.getItem(STORAGE_PERIODO_ACTIVO)
+            || localStorage.getItem("periodoRicardo");
+
+        if (periodoGuardado) {
+            const [anio, mes] = periodoGuardado.split("-");
+            periodoAnio.value = anio;
+            periodoMes.value = mes;
+        } else {
+            const hoy = new Date();
+            periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
+            periodoAnio.value = String(hoy.getFullYear());
+        }
+
+        periodoEnPantalla = obtenerPeriodo();
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
+        actualizarPestanaActiva();
+        generarPeriodo();
+        cargarDatos();
+    }
+
+    function cambiarMesActivo(mes, anio) {
+        const periodoActualGuardar = periodoEnPantalla || obtenerPeriodo();
+
+        if (periodoActualGuardar && tbody.querySelectorAll("tr").length > 0) {
+            guardarDatosLocales(
+                periodoActualGuardar,
+                recogerDatos(),
+                observacionesFinales.value
+            );
+        }
+
+        if (mes !== undefined) periodoMes.value = mes;
+        if (anio !== undefined) periodoAnio.value = String(anio);
+
+        const nuevoPeriodo = obtenerPeriodo();
+
+        if (!nuevoPeriodo) {
+            alert("Selecciona mes y ano del periodo");
+            return;
+        }
+
+        periodoEnPantalla = nuevoPeriodo;
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, nuevoPeriodo);
+        actualizarPestanaActiva();
+        generarPeriodo();
+        cargarDatos();
     }
 
     function obtenerPeriodo() {
@@ -180,10 +304,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `${anio}-${mes}`;
     }
 
-    function aplicarPeriodo(periodo) {
-        const [anio, mes] = periodo.split("-");
-        periodoAnio.value = anio;
-        periodoMes.value = mes;
+    function crearPestanasMeses() {
+        meses2026.forEach(mes => {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "mesTab";
+            boton.textContent = mes.texto;
+            boton.dataset.mes = mes.valor;
+            boton.setAttribute("aria-label", `${mes.texto} de 2026`);
+            boton.addEventListener("click", () => {
+                cambiarMesActivo(mes.valor, "2026");
+                mesesTabsPanel.classList.remove("abierto");
+                btnMesesMenu.setAttribute("aria-expanded", "false");
+            });
+
+            mesesTabs.appendChild(boton);
+        });
+
+        actualizarPestanaActiva();
+    }
+
+    function actualizarPestanaActiva() {
+        const anioActivo = String(periodoAnio.value);
+        const mesActivo = periodoMes.value;
+
+        mesesTabs.querySelectorAll(".mesTab").forEach(boton => {
+            const activa = anioActivo === "2026" && boton.dataset.mes === mesActivo;
+            boton.classList.toggle("activa", activa);
+            boton.setAttribute("aria-pressed", activa ? "true" : "false");
+        });
+
+        const mesActivoTexto = meses2026.find(mes => mes.valor === mesActivo)?.texto;
+        mesesMenuTitulo.textContent = mesActivoTexto
+            ? `Año 2026 · ${mesActivoTexto}`
+            : "Año 2026";
     }
 
     function generarPeriodo() {
@@ -197,17 +351,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         tbody.innerHTML = "";
 
         const [anio, mes] = periodo.split("-").map(Number);
-        const fecha = new Date(anio, mes - 1, 26, 0, 0, 0);
-        const fechaFin = new Date(anio, mes, 25, 0, 0, 0);
+        const fechaInicio = new Date(anio, mes - 2, 26, 0, 0, 0);
+        const fechaFin = new Date(anio, mes - 1, 25, 0, 0, 0);
+        const fecha = new Date(fechaInicio);
 
-        periodoActual.textContent = `${formatearFecha(fecha)} - ${formatearFecha(fechaFin)}`;
+        periodoActual.textContent = `${formatearFecha(fechaInicio)} - ${formatearFecha(fechaFin)}`;
 
         while (fecha <= fechaFin) {
-            const fila = document.createElement("tr");
-            const fechaFormateada = formatearFecha(fecha);
+            tbody.appendChild(crearFilaDia(new Date(fecha)));
+            fecha.setDate(fecha.getDate() + 1);
+        }
 
-            fila.dataset.fecha = fechaFormateada;
-            fila.innerHTML = `
+        actualizarTotales();
+    }
+
+    function crearFilaDia(fecha) {
+        const fila = document.createElement("tr");
+        const fechaFormateada = formatearFecha(fecha);
+
+        fila.dataset.fecha = fechaFormateada;
+        fila.innerHTML = `
                 <td class="fecha" data-label="Fecha">
                     ${fechaFormateada}
                     <br>
@@ -244,12 +407,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </td>
             `;
 
-            tbody.appendChild(fila);
-            configurarFila(fila);
-            fecha.setDate(fecha.getDate() + 1);
-        }
-
-        actualizarTotales();
+        configurarFila(fila);
+        return fila;
     }
 
     function configurarFila(fila) {
@@ -422,9 +581,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function guardarDatosLocales(periodo, datos, observaciones) {
-        localStorage.setItem("jornadaRicardo", JSON.stringify(datos));
-        localStorage.setItem("periodoRicardo", periodo);
-        localStorage.setItem("observacionesFinalesRicardo", observaciones);
+        if (!periodo) return;
+
+        const mapa = leerJornadasPorPeriodo();
+        mapa[periodo] = { datos, observaciones };
+        localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodo);
     }
 
     async function guardarDatosEnNube(periodo, datos, mostrarError = true) {
@@ -476,52 +638,62 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function limpiarPantalla() {
-        localStorage.removeItem("jornadaRicardo");
-        localStorage.removeItem("periodoRicardo");
-        localStorage.removeItem("observacionesFinalesRicardo");
+        localStorage.removeItem(STORAGE_JORNADAS);
+        localStorage.removeItem(STORAGE_PERIODO_ACTIVO);
         authPassword.value = "";
         observacionesFinales.value = "";
-        prepararPeriodoInicial();
+
+        const hoy = new Date();
+        periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
+        periodoAnio.value = String(hoy.getFullYear());
+        periodoEnPantalla = obtenerPeriodo();
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
+        actualizarPestanaActiva();
         generarPeriodo();
         actualizarTotales();
     }
 
+    function aplicarDatoAFila(fila, dato) {
+        const tiempos = fila.querySelectorAll("input[type='time']");
+        const numeros = fila.querySelectorAll("input[type='number']");
+
+        tiempos[0].value = dato.entradaM || "";
+        tiempos[1].value = dato.salidaM || "";
+        tiempos[2].value = dato.entradaT || "";
+        tiempos[3].value = dato.salidaT || "";
+        numeros[0].value = dato.dieta || "0.00";
+        numeros[1].value = dato.pernocta || "0";
+        fila.querySelector("textarea").value = dato.observacion || "";
+
+        if (dato.gps) {
+            fila.dataset.gps = dato.gps;
+        } else {
+            delete fila.dataset.gps;
+        }
+
+        calcularHorasFila(fila);
+    }
+
     function cargarDatos() {
-        observacionesFinales.value = localStorage.getItem("observacionesFinalesRicardo") || "";
+        const periodo = obtenerPeriodo();
+        const entrada = obtenerDatosPeriodo(periodo);
 
-        const datosGuardados = localStorage.getItem("jornadaRicardo");
-        if (!datosGuardados) return;
+        observacionesFinales.value = entrada?.observaciones || "";
 
-        let datos;
-
-        try {
-            datos = JSON.parse(datosGuardados);
-        } catch (error) {
-            console.error("No se pudieron leer los datos guardados", error);
+        if (!entrada?.datos?.length) {
+            actualizarTotales();
             return;
         }
 
-        const filas = document.querySelectorAll("#tablaBody tr");
+        const datosPorFecha = Object.fromEntries(
+            entrada.datos.map(dato => [dato.fecha, dato])
+        );
 
-        datos.forEach((dato, i) => {
-            if (!filas[i]) return;
+        document.querySelectorAll("#tablaBody tr").forEach(fila => {
+            const dato = datosPorFecha[fila.dataset.fecha];
+            if (!dato) return;
 
-            const tiempos = filas[i].querySelectorAll("input[type='time']");
-            const numeros = filas[i].querySelectorAll("input[type='number']");
-
-            tiempos[0].value = dato.entradaM || "";
-            tiempos[1].value = dato.salidaM || "";
-            tiempos[2].value = dato.entradaT || "";
-            tiempos[3].value = dato.salidaT || "";
-            numeros[0].value = dato.dieta || "0.00";
-            numeros[1].value = dato.pernocta || "0";
-            filas[i].querySelector("textarea").value = dato.observacion || "";
-
-            if (dato.gps) {
-                filas[i].dataset.gps = dato.gps;
-            }
-
-            calcularHorasFila(filas[i]);
+            aplicarDatoAFila(fila, dato);
         });
 
         actualizarTotales();
@@ -531,7 +703,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const cargadoDeNube = await cargarDatosDesdeNube();
 
         if (!cargadoDeNube) {
-            cargarPeriodo();
             cargarDatos();
         }
 
@@ -565,18 +736,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!data) return false;
 
         guardarDatosLocales(periodo, data.datos || [], data.observaciones_finales || "");
+        periodoEnPantalla = periodo;
         cargarDatos();
         return true;
-    }
-
-    function cargarPeriodo() {
-        const periodo = localStorage.getItem("periodoRicardo");
-
-        if (periodo) {
-            aplicarPeriodo(periodo);
-        }
-
-        generarPeriodo();
     }
 
     function formatearFecha(fecha) {
