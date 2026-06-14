@@ -107,7 +107,6 @@ h1{
     width:100%;
 }
 
-/* Contenedor de selección de mes y año desplegables */
 .controlesPeriodo {
     margin-bottom: 20px;
     display: flex;
@@ -167,7 +166,7 @@ button:hover{
 }
 
 .btnPeligro{
-    background:#9f2f2f;
+    background:#9f2f2f !important; /* Rojo corporativo original restaurado */
 }
 
 table{
@@ -178,19 +177,18 @@ table{
 }
 
 th,td{
-    border:1px solid #ccc;
+    border:1px solid #ccc !important; /* Bordes y cuadrícula bien definidos */
     padding:3px;
     text-align:center;
 }
 
 th{
-    background:#1f4e79;
+    background:#1f4e79 !important; /* Azul original para la fila del título */
     color:white;
 }
 
-/* Sombreado sutil para filas de fines de semana */
 tr.fila-fin-semana {
-    background-color: #f9f9f9;
+    background-color: #f9f9f9; /* Sombreado gris para fin de semana */
 }
 
 input[type="time"]{
@@ -247,7 +245,6 @@ td:nth-child(7){
     width:50px;
 }
 
-/* Dietas */
 th:nth-child(8),
 td:nth-child(8){
     width:56px;
@@ -258,7 +255,6 @@ td:nth-child(8) input{
     width:50px;
 }
 
-/* Pernocta */
 th:nth-child(9),
 td:nth-child(9){
     width:64px;
@@ -269,7 +265,6 @@ td:nth-child(9) input{
     width:58px;
 }
 
-/* Observaciones */
 th:nth-child(10),
 td:nth-child(10){
     width:180px;
@@ -310,7 +305,6 @@ textarea{
     overflow-x:auto;
 }
 
-/* Móvil */
 @media(max-width:768px){
     body{
         margin:0;

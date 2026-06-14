@@ -29,10 +29,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
     let periodoEnPantalla = "";
 
-    // Inicializa el selector dinámico de años en el desplegable
+    // Inicializar desplegable de años dinámicamente
     inicializarSelectorAnios();
 
-    // Evento del botón Refrescar
     if (btnRefrescar) {
         btnRefrescar.addEventListener("click", () => {
             window.location.reload(true);
@@ -74,13 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     observacionesFinales.addEventListener("input", () => {
         guardarDatos();
     });
-
-    periodoMes.addEventListener("change", () => cambiarMesActivo());
-    periodoAnio.addEventListener("change", () => cambiarMesActivo());
-
-    migrarStorageAntiguo();
-    iniciarPeriodo();
-    await actualizarEstadoSesion();
 
     function inicializarSelectorAnios() {
         const anioActual = new Date().getFullYear();
@@ -181,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         alert(guardadoEnNube
             ? "Datos guardados en la nube. Sesión cerrada."
-            : "Sesión cerrada. No se pudo confirmar el guardado en la nube.");
+            : "Sesión cerrada.");
     }
 
     async function limpiarPeriodo() {
@@ -285,8 +277,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         cargarDatos();
     }
 
-    document.getElementById("periodoMes").addEventListener("change", cambiarMesActivo);
-    document.getElementById("periodoAnio").addEventListener("change", cambiarMesActivo);
+    periodoMes.addEventListener("change", cambiarMesActivo);
+    periodoAnio.addEventListener("change", cambiarMesActivo);
+
+    migrarStorageAntiguo();
+    iniciarPeriodo();
+    await actualizarEstadoSesion();
 
     function obtenerPeriodo() {
         const mes = periodoMes.value;
@@ -678,7 +674,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}/${fecha.getFullYear()}`;
     }
 
-    fn nombreDia(fecha) {
+    function nombreDia(fecha) {
         return ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"][fecha.getDay()];
     }
 
