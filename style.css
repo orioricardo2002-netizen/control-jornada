@@ -1,22 +1,13 @@
-/* --- NUEVOS ESTILOS AÑADIDOS --- */
+/* --- CONFIGURACIÓN DE COLORES ORIGINALES Y LÍNEAS --- */
 
-/* Sombreado gris suave para las filas de Sábado y Domingo */
-#tablaBody tr.fila-fin-semana {
-    background-color: #f2f5f8 !important;
-}
-
-/* Oscurecer ligeramente la celda de la fecha en fines de semana para que resalte */
-#tablaBody tr.fila-fin-semana td.fecha {
-    background-color: #e4e9f0 !important;
-    font-weight: bold;
-}
-
-/* Estilo para el botón Refrescar */
-#btnRefrescar {
-    background-color: #6c757d;
-    color: white;
+/* Todos los botones generales y de autenticación en AZUL */
+.authPanel button, 
+.accionesPanel button,
+#tablaJornada button.ahora {
+    background-color: #0056b3 !important; /* Azul original */
+    color: white !important;
     border: none;
-    padding: 10px 16px;
+    padding: 10px 15px;
     font-size: 14px;
     font-weight: bold;
     border-radius: 4px;
@@ -24,15 +15,61 @@
     transition: background 0.2s;
 }
 
-#btnRefrescar:hover {
-    background-color: #5a6268;
+.authPanel button:hover, 
+.accionesPanel button:hover {
+    background-color: #004085 !important;
 }
 
-/* Asegurar que el sombreado se vea bien en pantallas móviles */
-@media (max-width: 768px) {
-    #tablaBody tr.fila-fin-semana {
-        border: 2px solid #cbd5e1;
-        background-color: #f8fafc !important;
-        margin-bottom: 15px;
-    }
+/* El botón Limpiar Periodo en color ROJO */
+#btnLimpiarPeriodo, .btnPeligro {
+    background-color: #dc3545 !important; /* Rojo original */
+    color: white !important;
+}
+
+#btnLimpiarPeriodo:hover {
+    background-color: #bd2130 !important;
+}
+
+/* Cabecera de la tabla en AZUL */
+#tablaJornada thead tr th {
+    background-color: #0056b3 !important;
+    color: white !important;
+    font-weight: bold;
+    padding: 12px 10px;
+    border: 1px solid #004085;
+}
+
+/* Mostrar líneas divisorias visibles en filas y columnas */
+#tablaJornada, #tablaJornada th, #tablaJornada td {
+    border: 1px solid #cccccc !important; /* Líneas grises claras visibles */
+    border-collapse: collapse;
+}
+
+#tablaJornada td {
+    padding: 8px;
+}
+
+/* Controles de selección de periodo */
+.controlesPeriodo {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.controlesPeriodo select {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Sombreado gris suave para filas de Sábado y Domingo */
+#tablaBody tr.fila-fin-semana {
+    background-color: #f2f4f7 !important;
+}
+
+/* Resalte sutil para la celda de la fecha en fin de semana */
+#tablaBody tr.fila-fin-semana td.fecha {
+    background-color: #e9ecf0 !important;
+    font-weight: bold;
 }
