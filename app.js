@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const observacionesFinales = document.getElementById("observacionesFinales");
     const tbody = document.getElementById("tablaBody");
     const mesesTabs = document.getElementById("mesesTabs");
-    const meses2026 = [
+    
+    const mesesLista = [
         { valor: "01", texto: "Ene" },
         { valor: "02", texto: "Feb" },
         { valor: "03", texto: "Mar" },
@@ -85,8 +86,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         guardarDatos();
     });
 
-    periodoMes.addEventListener("change", () => cambiarMesActivo());
-    periodoAnio.addEventListener("input", () => cambiarMesActivo());
+    // Detectar cuando cambia el año para refrescar las pestañas y el periodo de ese año
+    periodoAnio.addEventListener("change", () => {
+        cambiarMesActivo(periodoMes.value, periodoAnio.value);
+    });
 
     migrarStorageAntiguo();
     crearPestanasMeses();
@@ -133,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         authPassword.value = "";
         await actualizarEstadoSesion();
-        await cargarDatosGuardados(false);
+        await cargarDatosGuardados(false); // Carga masiva automática tras login
     }
 
     async function crearCuenta() {
@@ -284,7 +287,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const nuevoPeriodo = obtenerPeriodo();
 
         if (!nuevoPeriodo) {
-            alert("Selecciona mes y ano del periodo");
+            alert("Selecciona mes y año del periodo");
             return;
         }
 
@@ -305,15 +308,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function crearPestanasMeses() {
-        meses2026.forEach(mes => {
+        mesesTabs.innerHTML = ""; // Limpiar por si se regeneran
+        mesesLista.forEach(mes => {
             const boton = document.createElement("button");
             boton.type = "button";
             boton.className = "mesTab";
             boton.textContent = mes.texto;
             boton.dataset.mes = mes.valor;
-            boton.setAttribute("aria-label", `${mes.texto} de 2026`);
             boton.addEventListener("click", () => {
-                cambiarMesActivo(mes.valor, "2026");
+                cambiarMesActivo(mes.valor, periodoAnio.value);
                 mesesTabsPanel.classList.remove("abierto");
                 btnMesesMenu.setAttribute("aria-expanded", "false");
             });
@@ -329,22 +332,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         const mesActivo = periodoMes.value;
 
         mesesTabs.querySelectorAll(".mesTab").forEach(boton => {
-            const activa = anioActivo === "2026" && boton.dataset.mes === mesActivo;
+            const activa = boton.dataset.mes === mesActivo;
             boton.classList.toggle("activa", activa);
             boton.setAttribute("aria-pressed", activa ? "true" : "false");
+            boton.setAttribute("aria-label", `${boton.textContent} de ${anioActivo}`);
         });
 
-        const mesActivoTexto = meses2026.find(mes => mes.valor === mesActivo)?.texto;
+        const mesActivoTexto = mesesLista.find(mes => mes.valor === mesActivo)?.texto;
         mesesMenuTitulo.textContent = mesActivoTexto
-            ? `Año 2026 · ${mesActivoTexto}`
-            : "Año 2026";
+            ? `Año ${anioActivo} · ${mesActivoTexto}`
+            : `Año ${anioActivo}`;
     }
 
     function generarPeriodo() {
         const periodo = obtenerPeriodo();
 
         if (!periodo) {
-            alert("Selecciona mes y ano del periodo");
+            alert("Selecciona mes y año del periodo");
             return;
         }
 
@@ -378,12 +382,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${nombreDia(fecha)}
                     </small>
                 </td>
-                <td data-label="Entrada manana">
-                    <input type="time" aria-label="Entrada manana ${fechaFormateada}">
+                <td data-label="Entrada mañana">
+                    <input type="time" aria-label="Entrada mañana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td data-label="Salida manana">
-                    <input type="time" aria-label="Salida manana ${fechaFormateada}">
+                <td data-label="Salida mañana">
+                    <input type="time" aria-label="Salida mañana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
                 <td data-label="Entrada tarde">
@@ -479,7 +483,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function actualizarTotales() {
         let minutosTrabajados = 0;
-        let minutosExtras = 0;
+        let minutesExtras = 0;
         let totalDietas = 0;
         let totalPernoctas = 0;
         let totalDias = 0;
@@ -494,21 +498,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             minutosTrabajados += convertirHorasAMinutos(horas);
-            minutosExtras += convertirHorasAMinutos(extras);
+            minutesExtras += convertirHorasAMinutos(extras);
             totalDietas += parseFloat(numeros[0].value) || 0;
             totalPernoctas += parseFloat(numeros[1].value) || 0;
         });
 
         document.getElementById("totalDias").textContent = totalDias;
         document.getElementById("totalHoras").textContent = convertirMinutos(minutosTrabajados);
-        document.getElementById("totalExtras").textContent = convertirMinutos(minutosExtras);
+        document.getElementById("totalExtras").textContent = convertirMinutos(minutesExtras);
         document.getElementById("totalDietas").textContent = totalDietas.toFixed(2).replace(".", ",");
         document.getElementById("totalPernoctas").textContent = totalPernoctas.toFixed(0);
     }
 
     function convertirMinutos(minutos) {
         const horas = Math.floor(minutos / 60);
-        const mins = minutos % 60;
+        const mins = minutes % 60;
         return `${horas}:${String(mins).padStart(2, "0")}`;
     }
 
@@ -702,42 +706,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function cargarDatosGuardados(mostrarAviso = true) {
         const cargadoDeNube = await cargarDatosDesdeNube();
 
-        if (!cargadoDeNube) {
-            cargarDatos();
-        }
+        // Se refresca la interfaz con lo que sea que tengamos ahora localmente
+        cargarDatos();
 
         if (mostrarAviso) {
             alert(cargadoDeNube
-                ? "Datos cargados desde la nube"
-                : "Datos cargados desde este dispositivo. Para cargar desde la nube, inicia sesión en este navegador y asegúrate de haber seleccionado un periodo guardado.");
+                ? "Todos los periodos históricos se han descargado y cargado con éxito desde la nube."
+                : "Datos cargados desde este dispositivo. Para sincronizar desde la nube, inicia sesión.");
         }
     }
 
+    // AHORA ESTA FUNCIÓN BAJA TODOS LOS PERIODOS DEL USUARIO
     async function cargarDatosDesdeNube() {
         if (!supabaseClient) return false;
 
         const user = await actualizarEstadoSesion();
-        const periodo = obtenerPeriodo();
+        if (!user) return false;
 
-        if (!user || !periodo) return false;
-
+        // Quitamos el filtro por un único 'periodo' para traer toda la tabla remota del usuario
         const { data, error } = await supabaseClient
             .from("jornadas")
-            .select("datos, observaciones_finales")
-            .eq("user_id", user.id)
-            .eq("periodo", periodo)
-            .maybeSingle();
+            .select("periodo, datos, observaciones_finales")
+            .eq("user_id", user.id);
 
         if (error) {
             alert(`No se pudo cargar desde Supabase: ${error.message}`);
             return false;
         }
 
-        if (!data) return false;
+        if (!data || data.length === 0) return false;
 
-        guardarDatosLocales(periodo, data.datos || [], data.observaciones_finales || "");
-        periodoEnPantalla = periodo;
-        cargarDatos();
+        // Guardamos de manera masiva todos los periodos recibidos en nuestro mapa local
+        const mapa = leerJornadasPorPeriodo();
+        data.forEach(row => {
+            mapa[row.periodo] = {
+                datos: row.datos || [],
+                observaciones: row.observaciones_finales || ""
+            };
+        });
+
+        localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
         return true;
     }
 

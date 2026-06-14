@@ -50,12 +50,27 @@ h1{
     min-width:220px;
 }
 
+/* Nuevo contenedor para agrupar año y mes ordenadamente */
+.periodoSelectorPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f1f5f9;
+}
+
+.controlAnio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
 .mesesTabsPanel{
-    margin-bottom:18px;
-    padding:12px;
-    border:1px solid #ddd;
-    border-radius:8px;
-    background:#f8fafc;
+    width: 100%;
 }
 
 .btnMesesMenu,
@@ -100,7 +115,7 @@ h1{
 
 .mesesTabsPanel.abierto .mesesTabs{
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:repeat(3, 1fr);
     margin-top:12px;
 }
 
@@ -143,6 +158,12 @@ h1{
     .btnAccionesMenu,
     .btnMesesMenu{
         display:none;
+    }
+
+    .periodoSelectorPanel {
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
     }
 
     .mesesTabsPanel.abierto .mesesTabs,
@@ -197,7 +218,7 @@ input{
 }
 
 #periodoAnio{
-    width:90px;
+    width:110px;
 }
 
 button:hover{
@@ -302,16 +323,16 @@ td:nth-child(9) input{
     width:58px;
 }
 
-/* Observaciones */
+/* Observaciones AGRANDADO para asegurar que quepan más de 20 letras cómodamente */
 th:nth-child(10),
 td:nth-child(10){
-    width:180px;
+    width:260px;
 }
 
 textarea{
     width:100%;
     min-height:55px;
-    font-size:16px;
+    font-size:14px;
     box-sizing:border-box;
     resize:vertical;
 }
@@ -422,8 +443,7 @@ textarea{
 
     .authPanel,
     .accionesPanel,
-    .controlesOcultos,
-    .mesesTabsPanel,
+    .periodoSelectorPanel,
     .ahora{
         display:none !important;
     }
