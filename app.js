@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnMesesMenu = document.getElementById("btnMesesMenu");
     const mesesMenuTitulo = document.getElementById("mesesMenuTitulo");
     const mesesTabsPanel = document.querySelector(".mesesTabsPanel");
+    const btnRefrescar = document.getElementById("btnRefrescar"); // <-- Captura del nuevo botón
     const btnLogin = document.getElementById("btnLogin");
     const btnRegistro = document.getElementById("btnRegistro");
     const btnLogout = document.getElementById("btnLogout");
@@ -64,6 +65,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             accionesPanel.classList.remove("abierto");
             btnAccionesMenu.setAttribute("aria-expanded", "false");
         });
+    });
+
+    // Acción para el botón Refrescar (Fuerza recarga total saltándose la caché)
+    btnRefrescar.addEventListener("click", () => {
+        window.location.reload(true);
     });
 
     btnGuardar.addEventListener("click", async () => {
@@ -363,6 +369,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const fechaFormateada = formatearFecha(fecha);
 
         fila.dataset.fecha = fechaFormateada;
+        
+        // CORRECCIÓN: Si es sábado o domingo, añade la clase CSS para sombrear toda la fila
+        if (esFinSemana(fecha)) {
+            fila.classList.add("fila-fin-semana");
+        }
+
         fila.innerHTML = `
                 <td class="fecha" data-label="Fecha">
                     ${fechaFormateada}
@@ -386,7 +398,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         return fila;
     }
 
-    // EL RESTO DEL CÓDIGO SE MANTIENE EXACTAMENTE IGUAL E INTACTO
     function configurarFila(fila) {
         fila.querySelectorAll('input[type="time"]').forEach(input => {
             input.addEventListener("change", () => {
@@ -422,16 +433,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         const entradaT = tiempos[2].value;
         const salidaT = tiempos[3].value;
 
-        let minutos = 0;
+        let minutes = 0;
         if (entradaM && salidaT && !salidaM && !entradaT) {
-            minutos = diferenciaMinutos(entradaM, salidaT);
+            minutes = diferenciaMinutos(entradaM, salidaT);
         } else {
-            minutos += diferenciaMinutos(entradaM, salidaM);
-            minutos += diferenciaMinutos(entradaT, salidaT);
+            minutes += diferenciaMinutos(entradaM, salidaM);
+            minutes += diferenciaMinutos(entradaT, salidaT);
         }
 
-        fila.querySelector(".totalHoras").textContent = convertirMinutos(minutos);
-        calcularExtras(fila, minutos);
+        fila.querySelector(".totalHoras").textContent = convertirMinutos(minutes);
+        calcularExtras(fila, minutes);
         actualizarTotales();
     }
 
@@ -652,14 +663,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}/${fecha.getFullYear()}`;
     }
 
-    if (typeof nombreDia !== "function") {
-        window.nombreDia = function(fecha) {
-            return ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"][fecha.getDay()];
-        };
-    }
     function nombreDia(fecha) {
         return ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"][fecha.getDay()];
     }
+    
     function esFinSemana(fecha) {
         return fecha.getDay() === 0 || fecha.getDay() === 6;
     }
