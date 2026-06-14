@@ -90,10 +90,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         cambiarMesActivo(periodoMes.value, periodoAnio.value);
     });
 
+    // INICIALIZACIÓN DE LA APLICACIÓN
+    inicializarSelectorAnios(); // <-- Nueva función ejecutada al inicio
     migrarStorageAntiguo();
     crearPestanasMeses();
     iniciarPeriodo();
     await actualizarEstadoSesion();
+
+    // NUEVA FUNCIÓN PARA GENERAR LOS AÑOS DINÁMICAMENTE
+    function inicializarSelectorAnios() {
+        const anioActual = new Date().getFullYear();
+        const anioInicio = anioActual - 3; // Muestra desde 3 años atrás
+        const anioFin = anioActual + 5;    // Muestra hasta 5 años en el futuro
+
+        periodoAnio.innerHTML = "";
+        for (let i = anioInicio; i <= anioFin; i++) {
+            const option = document.createElement("option");
+            option.value = String(i);
+            option.textContent = String(i);
+            periodoAnio.appendChild(option);
+        }
+    }
 
     async function actualizarEstadoSesion() {
         if (!supabaseClient) {
@@ -254,7 +271,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (periodoGuardado) {
             const [anio, mes] = periodoGuardado.split("-");
-            periodoAnio.value = anio;
+            // Verificamos si el año guardado existe en las opciones generadas dinámicamente antes de asignarlo
+            if (periodoAnio.querySelector(`option[value="${anio}"]`)) {
+                periodoAnio.value = anio;
+            } else {
+                const opt = document.createElement("option");
+                opt.value = anio;
+                opt.textContent = anio;
+                periodoAnio.insertBefore(opt, periodoAnio.firstChild);
+                periodoAnio.value = anio;
+            }
             periodoMes.value = mes;
         } else {
             const hoy = new Date();
@@ -511,7 +537,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function convertirMinutos(minutos) {
         const horas = Math.floor(minutos / 60);
-        const mins = minutos % 60; // ¡ERRATA CORREGIDA AQUÍ! (Era 'minutes')
+        const mins = minutos % 60;
         return `${horas}:${String(mins).padStart(2, "0")}`;
     }
 
@@ -579,7 +605,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const guardadoEnNube = await guardarDatosEnNube(periodo, datos);
 
         alert(guardadoEnNube
-            ? "Datos guardados en la nube correctamente"
+            ? "Datos guardados in la nube correctamente"
             : "Datos guardados solo en este dispositivo. Inicia sesión para guardarlos en la nube.");
     }
 
@@ -650,7 +676,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
         periodoAnio.value = String(hoy.getFullYear());
         periodoEnPantalla = obtenerPeriodo();
-        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantacle);
         actualizarPestanaActiva();
         generarPeriodo();
         actualizarTotales();
