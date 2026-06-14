@@ -86,7 +86,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         guardarDatos();
     });
 
-    // Detectar cuando cambia el año para refrescar las pestañas y el periodo de ese año
     periodoAnio.addEventListener("change", () => {
         cambiarMesActivo(periodoMes.value, periodoAnio.value);
     });
@@ -136,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         authPassword.value = "";
         await actualizarEstadoSesion();
-        await cargarDatosGuardados(false); // Carga masiva automática tras login
+        await cargarDatosGuardados(false);
     }
 
     async function crearCuenta() {
@@ -308,7 +307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function crearPestanasMeses() {
-        mesesTabs.innerHTML = ""; // Limpiar por si se regeneran
+        mesesTabs.innerHTML = "";
         mesesLista.forEach(mes => {
             const boton = document.createElement("button");
             boton.type = "button";
@@ -512,7 +511,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function convertirMinutos(minutos) {
         const horas = Math.floor(minutos / 60);
-        const mins = minutes % 60;
+        const mins = minutos % 60; // ¡ERRATA CORREGIDA AQUÍ! (Era 'minutes')
         return `${horas}:${String(mins).padStart(2, "0")}`;
     }
 
@@ -705,8 +704,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function cargarDatosGuardados(mostrarAviso = true) {
         const cargadoDeNube = await cargarDatosDesdeNube();
-
-        // Se refresca la interfaz con lo que sea que tengamos ahora localmente
         cargarDatos();
 
         if (mostrarAviso) {
@@ -716,14 +713,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // AHORA ESTA FUNCIÓN BAJA TODOS LOS PERIODOS DEL USUARIO
     async function cargarDatosDesdeNube() {
         if (!supabaseClient) return false;
 
         const user = await actualizarEstadoSesion();
         if (!user) return false;
 
-        // Quitamos el filtro por un único 'periodo' para traer toda la tabla remota del usuario
         const { data, error } = await supabaseClient
             .from("jornadas")
             .select("periodo, datos, observaciones_finales")
@@ -736,7 +731,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (!data || data.length === 0) return false;
 
-        // Guardamos de manera masiva todos los periodos recibidos en nuestro mapa local
         const mapa = leerJornadasPorPeriodo();
         data.forEach(row => {
             mapa[row.periodo] = {
