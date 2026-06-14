@@ -36,14 +36,14 @@
         <div id="accionesMenu" class="accionesMenu">
             <button id="btnGuardar" type="button">Guardar</button>
             <button id="btnCargar" type="button">Cargar datos guardados</button>
-            <button id="btnPdf" type="button">Generar PDF</button>
+            <button id="btnPdf" type="button">PDF del periodo</button>
             <button id="btnLimpiarPeriodo" type="button" class="btnPeligro">Limpiar periodo</button>
         </div>
     </div>
 
     <div class="controlesPeriodo">
-        <label for="periodoMes">Mes:</label>
-        <select id="periodoMes">
+        <select id="periodoMes" aria-label="Mes del periodo">
+            <option value="">Mes</option>
             <option value="01">Enero</option>
             <option value="02">Febrero</option>
             <option value="03">Marzo</option>
@@ -57,8 +57,7 @@
             <option value="11">Noviembre</option>
             <option value="12">Diciembre</option>
         </select>
-        <label for="periodoAnio">Año:</label>
-        <select id="periodoAnio"></select>
+        <select id="periodoAnio" aria-label="Año del periodo"></select>
     </div>
 
     <table id="tablaJornada">

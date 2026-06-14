@@ -29,30 +29,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
     let periodoEnPantalla = "";
 
-    // 1. Inicializar selector desplegable de años dinámicamente antes de generar periodos
+    // Inicializa el selector dinámico de años en el desplegable
     inicializarSelectorAnios();
 
-    // Acción para el botón Refrescar (idéntico y funcional para saltarse la caché de iOS)
+    // Evento del botón Refrescar
     if (btnRefrescar) {
         btnRefrescar.addEventListener("click", () => {
             window.location.reload(true);
         });
     }
 
-    // Control del menú desplegable de acciones
     btnAccionesMenu.addEventListener("click", () => {
         const abierto = accionesPanel.classList.toggle("abierto");
         btnAccionesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
     });
 
-    if (accionesMenu) {
-        accionesMenu.querySelectorAll("button").forEach(boton => {
-            boton.addEventListener("click", () => {
+    accionesMenu.querySelectorAll("button").forEach(boton => {
+        boton.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
                 accionesPanel.classList.remove("abierto");
                 btnAccionesMenu.setAttribute("aria-expanded", "false");
-            });
+            }
         });
-    }
+    });
 
     btnGuardar.addEventListener("click", async () => {
         await guardarDatos(true);
@@ -79,15 +78,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     periodoMes.addEventListener("change", () => cambiarMesActivo());
     periodoAnio.addEventListener("change", () => cambiarMesActivo());
 
-    // Inicialización del flujo de la aplicación
     migrarStorageAntiguo();
     iniciarPeriodo();
     await actualizarEstadoSesion();
 
     function inicializarSelectorAnios() {
         const anioActual = new Date().getFullYear();
-        const anioInicio = anioActual - 3;
-        const anioFin = anioActual + 5;
+        const anioInicio = anioActual - 3; 
+        const anioFin = anioActual + 5; 
 
         periodoAnio.innerHTML = "";
         for (let i = anioInicio; i <= anioFin; i++) {
@@ -167,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         authPassword.value = "";
         await actualizarEstadoSesion();
-        alert("Cuenta creada con éxito.");
+        alert("Cuenta creada. Si Supabase te envía un email de confirmación, confírmalo antes de entrar.");
     }
 
     async function cerrarSesion() {
@@ -183,14 +181,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         alert(guardadoEnNube
             ? "Datos guardados en la nube. Sesión cerrada."
-            : "Sesión cerrada.");
+            : "Sesión cerrada. No se pudo confirmar el guardado en la nube.");
     }
 
     async function limpiarPeriodo() {
         const periodo = obtenerPeriodo();
-        if (!periodo) return;
 
-        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. ¿Continuar?`);
+        if (!periodo) {
+            alert("Selecciona un periodo antes de limpiarlo.");
+            return;
+        }
+
+        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. Esta acción no se puede deshacer. ¿Continuar?`);
+
         if (!confirmado) return;
 
         const borradoEnNube = await borrarPeriodoEnNube(periodo);
@@ -202,7 +205,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         generarPeriodo();
         guardarDatosLocales(periodo, recogerDatos(), "");
 
-        alert(borradoEnNube ? "Periodo limpiado." : "Periodo limpiado localmente.");
+        alert(borradoEnNube
+            ? "Periodo limpiado en este dispositivo y en la nube."
+            : "Periodo limpiado en este dispositivo.");
     }
 
     function migrarStorageAntiguo() {
@@ -223,14 +228,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
             localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoViejo);
         } catch (error) {
-            console.error(error);
+            console.error("No se pudieron migrar los datos guardados", error);
         }
     }
 
     function leerJornadasPorPeriodo() {
         const raw = localStorage.getItem(STORAGE_JORNADAS);
         if (!raw) return {};
-        try { return JSON.parse(raw); } catch (e) { return {}; }
+        try { return JSON.parse(raw); } catch (error) { return {}; }
     }
 
     function obtenerDatosPeriodo(periodo) {
@@ -239,7 +244,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function iniciarPeriodo() {
-        const periodoGuardado = localStorage.getItem(STORAGE_PERIODO_ACTIVO);
+        const periodoGuardado = localStorage.getItem(STORAGE_PERIODO_ACTIVO)
+            || localStorage.getItem("periodoRicardo");
 
         if (periodoGuardado) {
             const [anio, mes] = periodoGuardado.split("-");
@@ -254,7 +260,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         periodoEnPantalla = obtenerPeriodo();
-        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantaclear);
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
         generarPeriodo();
         cargarDatos();
     }
@@ -278,6 +284,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         generarPeriodo();
         cargarDatos();
     }
+
+    document.getElementById("periodoMes").addEventListener("change", cambiarMesActivo);
+    document.getElementById("periodoAnio").addEventListener("change", cambiarMesActivo);
 
     function obtenerPeriodo() {
         const mes = periodoMes.value;
@@ -311,7 +320,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const fechaFormateada = formatearFecha(fecha);
 
         fila.dataset.fecha = fechaFormateada;
-        
         if (esFinSemana(fecha)) {
             fila.classList.add("fila-fin-semana");
         }
@@ -320,19 +328,37 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <td class="fecha" data-label="Fecha">
                     ${fechaFormateada}
                     <br>
-                    <small>
+                    <small class="${esFinSemana(fecha) ? "fecha-fin-semana" : ""}">
                         ${nombreDia(fecha)}
                     </small>
                 </td>
-                <td data-label="Entrada mañana"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td data-label="Salida mañana"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td data-label="Entrada tarde"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td data-label="Salida tarde"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td class="totalHoras">0:00</td>
-                <td class="horasExtras">0:00</td>
-                <td data-label="Dieta EUR"><input type="number" min="0" max="99.99" step="0.01" value="0.00"></td>
-                <td data-label="Pernocta EUR"><input type="number" min="0" max="999" step="1" value="0"></td>
-                <td data-label="Observaciones"><textarea></textarea></td>
+                <td data-label="Entrada mañana">
+                    <input type="time" aria-label="Entrada mañana ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td data-label="Salida mañana">
+                    <input type="time" aria-label="Salida mañana ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td data-label="Entrada tarde">
+                    <input type="time" aria-label="Entrada tarde ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td data-label="Salida tarde">
+                    <input type="time" aria-label="Salida tarde ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td class="totalHoras" data-label="Total horas">0:00</td>
+                <td class="horasExtras" data-label="Horas extras">0:00</td>
+                <td data-label="Dieta EUR">
+                    <input type="number" min="0" max="99.99" step="0.01" value="0.00" aria-label="Dieta ${fechaFormateada}">
+                </td>
+                <td data-label="Pernocta EUR">
+                    <input type="number" min="0" max="999" step="1" value="0" aria-label="Pernocta ${fechaFormateada}">
+                </td>
+                <td data-label="Observaciones">
+                    <textarea aria-label="Observaciones ${fechaFormateada}"></textarea>
+                </td>
             `;
 
         configurarFila(fila);
@@ -346,20 +372,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                 guardarDatos();
             });
         });
+
         fila.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener("change", () => {
                 actualizarTotales();
                 guardarDatos();
             });
         });
+
         fila.querySelector("textarea").addEventListener("input", () => {
             guardarDatos();
         });
+
         fila.querySelectorAll(".ahora").forEach(btn => {
             btn.addEventListener("click", () => {
                 const input = btn.parentElement.querySelector("input[type='time']");
                 const ahora = new Date();
-                input.value = `${String(ahora.getHours()).padStart(2, "0")}:${String(ahora.getMinutes()).padStart(2, "0")}`;
+                const h = String(ahora.getHours()).padStart(2, "0");
+                const m = String(ahora.getMinutes()).padStart(2, "0");
+
+                input.value = `${h}:${m}`;
                 calcularHorasFila(fila);
                 guardarGPS(fila);
                 guardarDatos();
@@ -375,6 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const salidaT = tiempos[3].value;
 
         let minutos = 0;
+
         if (entradaM && salidaT && !salidaM && !entradaT) {
             minutos = diferenciaMinutos(entradaM, salidaT);
         } else {
@@ -408,7 +441,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const extras = fila.querySelector(".horasExtras").textContent;
             const numeros = fila.querySelectorAll("input[type='number']");
 
-            if (horas !== "0:00") totalDias++;
+            if (horas !== "0:00") {
+                totalDias++;
+            }
 
             minutosTrabajados += convertirHorasAMinutos(horas);
             minutosExtras += convertirHorasAMinutos(extras);
@@ -425,7 +460,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function convertirMinutos(minutos) {
         const horas = Math.floor(minutos / 60);
-        const mins = minutos % 60; // Variable corregida internamente
+        const mins = minutos % 60;
         return `${horas}:${String(mins).padStart(2, "0")}`;
     }
 
@@ -457,9 +492,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     function recogerDatos() {
         const filas = document.querySelectorAll("#tablaBody tr");
         const datos = [];
+
         filas.forEach(fila => {
             const tiempos = fila.querySelectorAll("input[type='time']");
             const numeros = fila.querySelectorAll("input[type='number']");
+
             datos.push({
                 fecha: fila.dataset.fecha,
                 entradaM: tiempos[0].value,
@@ -472,17 +509,23 @@ document.addEventListener("DOMContentLoaded", async () => {
                 gps: fila.dataset.gps || ""
             });
         });
+
         return datos;
     }
 
     async function guardarDatos(sincronizarNube = false) {
         const datos = recogerDatos();
         const periodo = obtenerPeriodo();
+
         guardarDatosLocales(periodo, datos, observacionesFinales.value);
 
         if (!sincronizarNube) return;
+
         const guardadoEnNube = await guardarDatosEnNube(periodo, datos);
-        alert(guardadoEnNube ? "Datos guardados en la nube." : "Guardado localmente.");
+
+        alert(guardadoEnNube
+            ? "Datos guardados en la nube correctamente"
+            : "Datos guardados solo en este dispositivo.");
     }
 
     function guardarDatosLocales(periodo, datos, observaciones) {
@@ -495,6 +538,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function guardarDatosEnNube(periodo, datos, mostrarError = true) {
         if (!supabaseClient || !periodo) return false;
+
         const user = await actualizarEstadoSesion();
         if (!user) return false;
 
@@ -506,13 +550,20 @@ document.addEventListener("DOMContentLoaded", async () => {
                 datos,
                 observaciones_finales: observacionesFinales.value,
                 updated_at: new Date().toISOString()
-            }, { onConflict: "user_id,periodo" });
+            }, {
+                onConflict: "user_id,periodo"
+            });
+
+        if (error && mostrarError) {
+            alert(`No se pudo guardar en Supabase: ${error.message}`);
+        }
 
         return !error;
     }
 
     async function borrarPeriodoEnNube(periodo) {
         if (!supabaseClient || !periodo) return false;
+
         const user = await actualizarEstadoSesion();
         if (!user) return false;
 
@@ -521,6 +572,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .delete()
             .eq("user_id", user.id)
             .eq("periodo", periodo);
+
         return !error;
     }
 
@@ -529,7 +581,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         localStorage.removeItem(STORAGE_PERIODO_ACTIVO);
         authPassword.value = "";
         observacionesFinales.value = "";
-        iniciarPeriodo();
+
+        const hoy = new Date();
+        periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
+        periodoAnio.value = String(hoy.getFullYear());
+        periodoEnPantalla = obtenerPeriodo();
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
+        generarPeriodo();
+        actualizarTotales();
     }
 
     function aplicarDatoAFila(fila, dato) {
@@ -544,8 +603,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         numeros[1].value = dato.pernocta || "0";
         fila.querySelector("textarea").value = dato.observacion || "";
 
-        if (dato.gps) fila.dataset.gps = dato.gps;
-        else delete fila.dataset.gps;
+        if (dato.gps) {
+            fila.dataset.gps = dato.gps;
+        } else {
+            delete fila.dataset.gps;
+        }
 
         calcularHorasFila(fila);
     }
@@ -561,28 +623,40 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const datosPorFecha = Object.fromEntries(entrada.datos.map(d => [d.fecha, d]));
+        const datosPorFecha = Object.fromEntries(
+            entrada.datos.map(dato => [dato.fecha, dato])
+        );
+
         document.querySelectorAll("#tablaBody tr").forEach(fila => {
             const dato = datosPorFecha[fila.dataset.fecha];
-            if (dato) aplicarDatoAFila(fila, dato);
+            if (!dato) return;
+
+            aplicarDatoAFila(fila, dato);
         });
+
         actualizarTotales();
     }
 
     async function cargarDatosGuardados(mostrarAviso = true) {
         const cargadoDeNube = await cargarDatosDesdeNube();
+
         if (!cargadoDeNube) {
             cargarDatos();
         }
+
         if (mostrarAviso) {
-            alert(cargadoDeNube ? "Datos cargados desde la nube" : "Datos cargados localmente.");
+            alert(cargadoDeNube
+                ? "Datos cargados desde la nube"
+                : "Datos cargados desde este dispositivo.");
         }
     }
 
     async function cargarDatosDesdeNube() {
         if (!supabaseClient) return false;
+
         const user = await actualizarEstadoSesion();
         const periodo = obtenerPeriodo();
+
         if (!user || !periodo) return false;
 
         const { data, error } = await supabaseClient
@@ -604,7 +678,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}/${fecha.getFullYear()}`;
     }
 
-    function nombreDia(fecha) {
+    fn nombreDia(fecha) {
         return ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"][fecha.getDay()];
     }
 
