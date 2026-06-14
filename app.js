@@ -12,7 +12,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnAccionesMenu = document.getElementById("btnAccionesMenu");
     const accionesMenu = document.getElementById("accionesMenu");
     const accionesPanel = document.querySelector(".accionesPanel");
-    const btnRefrescar = document.getElementById("btnRefrescar"); // Captura botón refrescar
+    const btnMesesMenu = document.getElementById("btnMesesMenu");
+    const mesesMenuTitulo = document.getElementById("mesesMenuTitulo");
+    const mesesTabsPanel = document.querySelector(".mesesTabsPanel");
+    const btnRefrescar = document.getElementById("btnRefrescar"); // Captura el botón de refrescar si existe
     const btnLogin = document.getElementById("btnLogin");
     const btnRegistro = document.getElementById("btnRegistro");
     const btnLogout = document.getElementById("btnLogout");
@@ -24,12 +27,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     const periodoActual = document.getElementById("periodoActual");
     const observacionesFinales = document.getElementById("observacionesFinales");
     const tbody = document.getElementById("tablaBody");
-
+    const mesesTabs = document.getElementById("mesesTabs");
+    
+    const meses2026 = [
+        { valor: "01", texto: "Ene" },
+        { valor: "02", texto: "Feb" },
+        { valor: "03", texto: "Mar" },
+        { valor: "04", texto: "Abr" },
+        { valor: "05", texto: "May" },
+        { valor: "06", texto: "Jun" },
+        { valor: "07", texto: "Jul" },
+        { valor: "08", texto: "Ago" },
+        { valor: "09", texto: "Sep" },
+        { valor: "10", texto: "Oct" },
+        { valor: "11", texto: "Nov" },
+        { valor: "12", texto: "Dic" }
+    ];
     const STORAGE_JORNADAS = "jornadasPorPeriodo";
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
     let periodoEnPantalla = "";
 
-    // Acción para el botón Refrescar (ignora la caché de la PWA de iOS)
+    // Acción para el botón Refrescar (PWA iOS)
     if (btnRefrescar) {
         btnRefrescar.addEventListener("click", () => {
             window.location.reload(true);
@@ -41,12 +59,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         btnAccionesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
     });
 
-    accionesMenu.querySelectorAll("button").forEach(boton => {
-        boton.addEventListener("click", () => {
-            accionesPanel.classList.remove("abierto");
-            btnAccionesMenu.setAttribute("aria-expanded", "false");
+    if (btnMesesMenu && mesesTabsPanel) {
+        btnMesesMenu.addEventListener("click", () => {
+            const abierto = mesesTabsPanel.classList.toggle("abierto");
+            btnMesesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
         });
-    });
+    }
+
+    if (accionesMenu) {
+        accionesMenu.querySelectorAll("button").forEach(boton => {
+            boton.addEventListener("click", () => {
+                accionesPanel.classList.remove("abierto");
+                btnAccionesMenu.setAttribute("aria-expanded", "false");
+            });
+        });
+    }
 
     btnGuardar.addEventListener("click", async () => {
         await guardarDatos(true);
@@ -70,16 +97,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         guardarDatos();
     });
 
-    periodoMes.addEventListener("change", () => {
-        cambiarMesActivo(periodoMes.value, periodoAnio.value);
-    });
+    periodoMes.addEventListener("change", () => cambiarMesActivo());
+    periodoAnio.addEventListener("input", () => cambiarMesActivo());
 
-    periodoAnio.addEventListener("change", () => {
-        cambiarMesActivo(periodoMes.value, periodoAnio.value);
-    });
-
-    // Inicialización segura de la app
+    // Inicialización de la aplicación
     migrarStorageAntiguo();
+    if (mesesTabs) {
+        crearPestanasMeses();
+    }
     iniciarPeriodo();
     await actualizarEstadoSesion();
 
@@ -252,6 +277,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         periodoEnPantalla = obtenerPeriodo();
         localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
+        if (mesesTabs) {
+            actualizarPestanaActiva();
+        }
         generarPeriodo();
         cargarDatos();
     }
@@ -273,12 +301,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const nuevoPeriodo = obtenerPeriodo();
 
         if (!nuevoPeriodo) {
-            alert("Selecciona mes y año del periodo");
+            alert("Selecciona mes y ano del periodo");
             return;
         }
 
         periodoEnPantalla = nuevoPeriodo;
         localStorage.setItem(STORAGE_PERIODO_ACTIVO, nuevoPeriodo);
+        if (mesesTabs) {
+            actualizarPestanaActiva();
+        }
         generarPeriodo();
         cargarDatos();
     }
@@ -292,11 +323,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `${anio}-${mes}`;
     }
 
+    function crearPestanasMeses() {
+        meses2026.forEach(mes => {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "mesTab";
+            boton.textContent = mes.texto;
+            boton.dataset.mes = mes.valor;
+            boton.setAttribute("aria-label", `${mes.texto} de 2026`);
+            boton.addEventListener("click", () => {
+                cambiarMesActivo(mes.valor, "2026");
+                if (mesesTabsPanel) mesesTabsPanel.classList.remove("abierto");
+                if (btnMesesMenu) btnMesesMenu.setAttribute("aria-expanded", "false");
+            });
+
+            mesesTabs.appendChild(boton);
+        });
+
+        actualizarPestanaActiva();
+    }
+
+    function actualizarPestanaActiva() {
+        const anioActivo = String(periodoAnio.value);
+        const mesActivo = periodoMes.value;
+
+        mesesTabs.querySelectorAll(".mesTab").forEach(boton => {
+            const activa = anioActivo === "2026" && boton.dataset.mes === mesActivo;
+            boton.classList.toggle("activa", activa);
+            boton.setAttribute("aria-pressed", activa ? "true" : "false");
+        });
+
+        const mesActivoTexto = meses2026.find(mes => mes.valor === mesActivo)?.texto;
+        if (mesesMenuTitulo) {
+            mesesMenuTitulo.textContent = mesActivoTexto
+                ? `Año 2026 · ${mesActivoTexto}`
+                : "Año 2026";
+        }
+    }
+
     function generarPeriodo() {
         const periodo = obtenerPeriodo();
 
         if (!periodo) {
-            alert("Selecciona mes y año del periodo");
+            alert("Selecciona mes y ano del periodo");
             return;
         }
 
@@ -322,8 +391,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const fechaFormateada = formatearFecha(fecha);
 
         fila.dataset.fecha = fechaFormateada;
-
-        // Añadir clase si es fin de semana para el sombrado CSS
+        
+        // Aplica la clase para sombrear los fines de semana
         if (esFinSemana(fecha)) {
             fila.classList.add("fila-fin-semana");
         }
@@ -336,12 +405,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${nombreDia(fecha)}
                     </small>
                 </td>
-                <td data-label="Entrada mañana">
-                    <input type="time" aria-label="Entrada mañana ${fechaFormateada}">
+                <td data-label="Entrada manana">
+                    <input type="time" aria-label="Entrada manana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td data-label="Salida mañana">
-                    <input type="time" aria-label="Salida mañana ${fechaFormateada}">
+                <td data-label="Salida manana">
+                    <input type="time" aria-label="Salida manana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
                 <td data-label="Entrada tarde">
@@ -437,7 +506,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function actualizarTotales() {
         let minutosTrabajados = 0;
-        let minutesExtras = 0;
+        let minutosExtras = 0;
         let totalDietas = 0;
         let totalPernoctas = 0;
         let totalDias = 0;
@@ -452,21 +521,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             minutosTrabajados += convertirHorasAMinutos(horas);
-            minutesExtras += convertirHorasAMinutos(extras);
+            minutosExtras += convertirHorasAMinutos(extras);
             totalDietas += parseFloat(numeros[0].value) || 0;
             totalPernoctas += parseFloat(numeros[1].value) || 0;
         });
 
         document.getElementById("totalDias").textContent = totalDias;
         document.getElementById("totalHoras").textContent = convertirMinutos(minutosTrabajados);
-        document.getElementById("totalExtras").textContent = convertirMinutos(minutesExtras);
+        document.getElementById("totalExtras").textContent = convertirMinutos(minutosExtras);
         document.getElementById("totalDietas").textContent = totalDietas.toFixed(2).replace(".", ",");
         document.getElementById("totalPernoctas").textContent = totalPernoctas.toFixed(0);
     }
 
     function convertirMinutos(minutos) {
         const horas = Math.floor(minutos / 60);
-        const mins = minutes % 60;
+        const mins = minutos % 60; // <-- CORREGIDO: antes usaba 'minutes' rompiendo la app
         return `${horas}:${String(mins).padStart(2, "0")}`;
     }
 
@@ -486,230 +555,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function guardarGPS(fila) {
-        if (!navigator.geolocation) return;
-
-        navigator.geolocation.getCurrentPosition(pos => {
-            fila.dataset.gps = JSON.stringify({
-                lat: pos.coords.latitude,
-                lon: pos.coords.longitude,
-                fecha: new Date().toISOString()
-            });
-
-            guardarDatos();
-        });
-    }
-
-    function recogerDatos() {
-        const filas = document.querySelectorAll("#tablaBody tr");
-        const datos = [];
-
-        filas.forEach(fila => {
-            const tiempos = fila.querySelectorAll("input[type='time']");
-            const numeros = fila.querySelectorAll("input[type='number']");
-
-            datos.push({
-                fecha: fila.dataset.fecha,
-                entradaM: tiempos[0].value,
-                salidaM: tiempos[1].value,
-                entradaT: tiempos[2].value,
-                salidaT: tiempos[3].value,
-                dieta: numeros[0].value,
-                pernocta: numeros[1].value,
-                observacion: fila.querySelector("textarea").value,
-                gps: fila.dataset.gps || ""
-            });
-        });
-
-        return datos;
-    }
-
-    async function guardarDatos(sincronizarNube = false) {
-        const datos = recogerDatos();
-        const periodo = obtenerPeriodo();
-
-        guardarDatosLocales(periodo, datos, observacionesFinales.value);
-
-        if (!sincronizarNube) return;
-
-        const guardadoEnNube = await guardarDatosEnNube(periodo, datos);
-
-        alert(guardadoEnNube
-            ? "Datos guardados en la nube correctamente"
-            : "Datos guardados solo en este dispositivo. Inicia sesión para guardarlos en la nube.");
-    }
-
-    function guardarDatosLocales(periodo, datos, observaciones) {
-        if (!periodo) return;
-
-        const mapa = leerJornadasPorPeriodo();
-        mapa[periodo] = { datos, observaciones };
-        localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
-        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodo);
-    }
-
-    async function guardarDatosEnNube(periodo, datos, mostrarError = true) {
-        if (!supabaseClient || !periodo) return false;
-
-        const user = await actualizarEstadoSesion();
-        if (!user) return false;
-
-        const { error } = await supabaseClient
-            .from("jornadas")
-            .upsert({
-                user_id: user.id,
-                periodo,
-                datos,
-                observaciones_finales: observacionesFinales.value,
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: "user_id,periodo"
-            });
-
-        if (error) {
-            if (mostrarError) {
-                alert(`No se pudo guardar en Supabase: ${error.message}`);
-            }
-            return false;
-        }
-
-        return true;
-    }
-
-    async function borrarPeriodoEnNube(periodo) {
-        if (!supabaseClient || !periodo) return false;
-
-        const user = await actualizarEstadoSesion();
-        if (!user) return false;
-
-        const { error } = await supabaseClient
-            .from("jornadas")
-            .delete()
-            .eq("user_id", user.id)
-            .eq("periodo", periodo);
-
-        if (error) {
-            alert(`No se pudo borrar el periodo en Supabase: ${error.message}`);
-            return false;
-        }
-
-        return true;
-    }
-
-    function limpiarPantalla() {
-        localStorage.removeItem(STORAGE_JORNADAS);
-        localStorage.removeItem(STORAGE_PERIODO_ACTIVO);
-        authPassword.value = "";
-        observacionesFinales.value = "";
-
-        const hoy = new Date();
-        periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
-        periodoAnio.value = String(hoy.getFullYear());
-        periodoEnPantalla = obtenerPeriodo();
-        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
-        generarPeriodo();
-        actualizarTotales();
-    }
-
-    function aplicarDatoAFila(fila, dato) {
-        const tiempos = fila.querySelectorAll("input[type='time']");
-        const numeros = fila.querySelectorAll("input[type='number']");
-
-        tiempos[0].value = dato.entradaM || "";
-        tiempos[1].value = dato.salidaM || "";
-        tiempos[2].value = dato.entradaT || "";
-        tiempos[3].value = dato.salidaT || "";
-        numeros[0].value = dato.dieta || "0.00";
-        numeros[1].value = dato.pernocta || "0";
-        fila.querySelector("textarea").value = dato.observacion || "";
-
-        if (dato.gps) {
-            fila.dataset.gps = dato.gps;
-        } else {
-            delete fila.dataset.gps;
-        }
-
-        calcularHorasFila(fila);
-    }
-
-    function cargarDatos() {
-        const periodo = obtenerPeriodo();
-        const entrada = obtenerDatosPeriodo(periodo);
-
-        observacionesFinales.value = entrada?.observaciones || "";
-
-        if (!entrada?.datos?.length) {
-            actualizarTotales();
-            return;
-        }
-
-        const datosPorFecha = Object.fromEntries(
-            entrada.datos.map(dato => [dato.fecha, dato])
-        );
-
-        document.querySelectorAll("#tablaBody tr").forEach(fila => {
-            const dato = datosPorFecha[fila.dataset.fecha];
-            if (!dato) return;
-
-            aplicarDatoAFila(fila, dato);
-        });
-
-        actualizarTotales();
-    }
-
-    async function cargarDatosGuardados(mostrarAviso = true) {
-        const cargadoDeNube = await cargarDatosDesdeNube();
-        cargarDatos();
-
-        if (mostrarAviso) {
-            alert(cargadoDeNube
-                ? "Todos los periodos históricos se han descargado y cargado con éxito desde la nube."
-                : "Datos cargados desde este dispositivo. Para sincronizar desde la nube, inicia sesión y vuelve a intentarlo.");
-        }
-    }
-
-    async function cargarDatosDesdeNube() {
-        if (!supabaseClient) return false;
-
-        const user = await actualizarEstadoSesion();
-        if (!user) return false;
-
-        const { data, error } = await supabaseClient
-            .from("jornadas")
-            .select("periodo, datos, observaciones_finales")
-            .eq("user_id", user.id);
-
-        if (error) {
-            alert(`No se pudo cargar desde Supabase: ${error.message}`);
-            return false;
-        }
-
-        if (!data || data.length === 0) return false;
-
-        const mapa = leerJornadasPorPeriodo();
-        data.forEach(row => {
-            mapa[row.periodo] = {
-                datos: row.datos || [],
-                observaciones: row.observaciones_finales || ""
-            };
-        });
-
-        localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
-        return true;
-    }
-
-    function formatearFecha(fecha) {
-        const d = String(fecha.getDate()).padStart(2, "0");
-        const m = String(fecha.getMonth() + 1).padStart(2, "0");
-        const y = fecha.getFullYear();
-        return `${d}/${m}/${y}`;
-    }
-
-    function nombreDia(fecha) {
-        const dias = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
-        return dias[fecha.getDay()];
-    }
-
-    function esFinSemana(fecha) {
-        return fecha.getDay() === 0 || fecha.getDay() === 6;
-    }
-});
