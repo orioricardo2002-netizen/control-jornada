@@ -12,10 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnAccionesMenu = document.getElementById("btnAccionesMenu");
     const accionesMenu = document.getElementById("accionesMenu");
     const accionesPanel = document.querySelector(".accionesPanel");
-    const btnMesesMenu = document.getElementById("btnMesesMenu");
-    const mesesMenuTitulo = document.getElementById("mesesMenuTitulo");
-    const mesesTabsPanel = document.querySelector(".mesesTabsPanel");
-    const btnRefrescar = document.getElementById("btnRefrescar"); // <-- Captura del nuevo botón
+    const btnRefrescar = document.getElementById("btnRefrescar"); // Captura botón refrescar
     const btnLogin = document.getElementById("btnLogin");
     const btnRegistro = document.getElementById("btnRegistro");
     const btnLogout = document.getElementById("btnLogout");
@@ -27,37 +24,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const periodoActual = document.getElementById("periodoActual");
     const observacionesFinales = document.getElementById("observacionesFinales");
     const tbody = document.getElementById("tablaBody");
-    const mesesTabs = document.getElementById("mesesTabs");
-    
-    const mesesLista = [
-        { valor: "01", texto: "Ene" },
-        { valor: "02", texto: "Feb" },
-        { valor: "03", texto: "Mar" },
-        { valor: "04", texto: "Abr" },
-        { valor: "05", texto: "May" },
-        { valor: "06", texto: "Jun" },
-        { valor: "07", texto: "Jul" },
-        { valor: "08", texto: "Ago" },
-        { valor: "09", texto: "Sep" },
-        { valor: "10", texto: "Oct" },
-        { valor: "11", texto: "Nov" },
-        { valor: "12", texto: "Dic" }
-    ];
+
     const STORAGE_JORNADAS = "jornadasPorPeriodo";
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
     let periodoEnPantalla = "";
 
-    // 1. GENERAR AÑOS PRIMERO PARA QUE EL SELECT TENGA VALORES BASE
-    inicializarSelectorAnios();
+    // Acción para el botón Refrescar (ignora la caché de la PWA de iOS)
+    if (btnRefrescar) {
+        btnRefrescar.addEventListener("click", () => {
+            window.location.reload(true);
+        });
+    }
 
     btnAccionesMenu.addEventListener("click", () => {
         const abierto = accionesPanel.classList.toggle("abierto");
         btnAccionesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
-    });
-
-    btnMesesMenu.addEventListener("click", () => {
-        const abierto = mesesTabsPanel.classList.toggle("abierto");
-        btnMesesMenu.setAttribute("aria-expanded", abierto ? "true" : "false");
     });
 
     accionesMenu.querySelectorAll("button").forEach(boton => {
@@ -65,11 +46,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             accionesPanel.classList.remove("abierto");
             btnAccionesMenu.setAttribute("aria-expanded", "false");
         });
-    });
-
-    // Acción para el botón Refrescar (Fuerza recarga total saltándose la caché)
-    btnRefrescar.addEventListener("click", () => {
-        window.location.reload(true);
     });
 
     btnGuardar.addEventListener("click", async () => {
@@ -86,7 +62,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     btnLimpiarPeriodo.addEventListener("click", limpiarPeriodo);
-
     btnLogin.addEventListener("click", iniciarSesion);
     btnRegistro.addEventListener("click", crearCuenta);
     btnLogout.addEventListener("click", cerrarSesion);
@@ -95,32 +70,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         guardarDatos();
     });
 
+    periodoMes.addEventListener("change", () => {
+        cambiarMesActivo(periodoMes.value, periodoAnio.value);
+    });
+
     periodoAnio.addEventListener("change", () => {
         cambiarMesActivo(periodoMes.value, periodoAnio.value);
     });
 
-    // 2. SEGUIR CON EL RESTO DE LA CARGA DE LA APP
+    // Inicialización segura de la app
     migrarStorageAntiguo();
-    crearPestanasMeses();
     iniciarPeriodo();
     await actualizarEstadoSesion();
-
-    function inicializarSelectorAnios() {
-        const anioActual = new Date().getFullYear();
-        const anioInicio = anioActual - 3; // 3 años atrás
-        const anioFin = anioActual + 5;    // 5 años adelante
-
-        periodoAnio.innerHTML = "";
-        for (let i = anioInicio; i <= anioFin; i++) {
-            const option = document.createElement("option");
-            option.value = String(i);
-            option.textContent = String(i);
-            if (i === anioActual) {
-                option.selected = true;
-            }
-            periodoAnio.appendChild(option);
-        }
-    }
 
     async function actualizarEstadoSesion() {
         if (!supabaseClient) {
@@ -188,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         authPassword.value = "";
         await actualizarEstadoSesion();
-        alert("Cuenta creada. Confirma el correo si Supabase te lo solicita.");
+        alert("Cuenta creada. Si Supabase te envía un email de confirmación, confírmalo antes de entrar.");
     }
 
     async function cerrarSesion() {
@@ -204,14 +165,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         alert(guardadoEnNube
             ? "Datos guardados en la nube. Sesión cerrada."
-            : "Sesión cerrada.");
+            : "Sesión cerrada. No se pudo confirmar el guardado en la nube.");
     }
 
     async function limpiarPeriodo() {
         const periodo = obtenerPeriodo();
-        if (!periodo) return;
 
-        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. ¿Continuar?`);
+        if (!periodo) {
+            alert("Selecciona un periodo antes de limpiarlo.");
+            return;
+        }
+
+        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. Esta acción no se puede deshacer. ¿Continuar?`);
+
         if (!confirmado) return;
 
         const borradoEnNube = await borrarPeriodoEnNube(periodo);
@@ -223,7 +189,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         generarPeriodo();
         guardarDatosLocales(periodo, recogerDatos(), "");
 
-        alert(borradoEnNube ? "Periodo limpiado." : "Periodo limpiado localmente.");
+        alert(borradoEnNube
+            ? "Periodo limpiado en este dispositivo y en la nube."
+            : "Periodo limpiado en este dispositivo. Si quieres borrarlo también de la nube, inicia sesión y vuelve a limpiarlo.");
     }
 
     function migrarStorageAntiguo() {
@@ -241,32 +209,40 @@ document.addEventListener("DOMContentLoaded", async () => {
                     observaciones: localStorage.getItem("observacionesFinalesRicardo") || ""
                 }
             };
+
             localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
             localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoViejo);
         } catch (error) {
-            console.error(error);
+            console.error("No se pudieron migrar los datos guardados", error);
         }
     }
 
     function leerJornadasPorPeriodo() {
         const raw = localStorage.getItem(STORAGE_JORNADAS);
+
         if (!raw) return {};
-        try { return JSON.parse(raw); } catch (e) { return {}; }
+
+        try {
+            return JSON.parse(raw);
+        } catch (error) {
+            console.error("No se pudieron leer los periodos guardados", error);
+            return {};
+        }
     }
 
     function obtenerDatosPeriodo(periodo) {
         if (!periodo) return null;
+
         return leerJornadasPorPeriodo()[periodo] || null;
     }
 
     function iniciarPeriodo() {
-        const periodoGuardado = localStorage.getItem(STORAGE_PERIODO_ACTIVO);
+        const periodoGuardado = localStorage.getItem(STORAGE_PERIODO_ACTIVO)
+            || localStorage.getItem("periodoRicardo");
 
         if (periodoGuardado) {
             const [anio, mes] = periodoGuardado.split("-");
-            if (periodoAnio.querySelector(`option[value="${anio}"]`)) {
-                periodoAnio.value = anio;
-            }
+            periodoAnio.value = anio;
             periodoMes.value = mes;
         } else {
             const hoy = new Date();
@@ -276,7 +252,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         periodoEnPantalla = obtenerPeriodo();
         localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
-        actualizarPestanaActiva();
         generarPeriodo();
         cargarDatos();
     }
@@ -296,11 +271,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (anio !== undefined) periodoAnio.value = String(anio);
 
         const nuevoPeriodo = obtenerPeriodo();
-        if (!nuevoPeriodo) return;
+
+        if (!nuevoPeriodo) {
+            alert("Selecciona mes y año del periodo");
+            return;
+        }
 
         periodoEnPantalla = nuevoPeriodo;
         localStorage.setItem(STORAGE_PERIODO_ACTIVO, nuevoPeriodo);
-        actualizarPestanaActiva();
         generarPeriodo();
         cargarDatos();
     }
@@ -308,45 +286,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     function obtenerPeriodo() {
         const mes = periodoMes.value;
         const anio = Number(periodoAnio.value);
+
         if (!mes || !anio) return "";
+
         return `${anio}-${mes}`;
-    }
-
-    function crearPestanasMeses() {
-        mesesTabs.innerHTML = "";
-        mesesLista.forEach(mes => {
-            const boton = document.createElement("button");
-            boton.type = "button";
-            boton.className = "mesTab";
-            boton.textContent = mes.texto;
-            boton.dataset.mes = mes.valor;
-            boton.addEventListener("click", () => {
-                cambiarMesActivo(mes.valor, periodoAnio.value);
-                mesesTabsPanel.classList.remove("abierto");
-                btnMesesMenu.setAttribute("aria-expanded", "false");
-            });
-            mesesTabs.appendChild(boton);
-        });
-        actualizarPestanaActiva();
-    }
-
-    function actualizarPestanaActiva() {
-        const anioActivo = String(periodoAnio.value);
-        const mesActivo = periodoMes.value;
-
-        mesesTabs.querySelectorAll(".mesTab").forEach(boton => {
-            const activa = boton.dataset.mes === mesActivo;
-            boton.classList.toggle("activa", activa);
-            boton.setAttribute("aria-pressed", activa ? "true" : "false");
-        });
-
-        const mesActivoTexto = mesesLista.find(mes => mes.valor === mesActivo)?.texto;
-        mesesMenuTitulo.textContent = `Año ${anioActivo} · ${mesActivoTexto || ""}`;
     }
 
     function generarPeriodo() {
         const periodo = obtenerPeriodo();
-        if (!periodo) return;
+
+        if (!periodo) {
+            alert("Selecciona mes y año del periodo");
+            return;
+        }
 
         tbody.innerHTML = "";
 
@@ -361,6 +313,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             tbody.appendChild(crearFilaDia(new Date(fecha)));
             fecha.setDate(fecha.getDate() + 1);
         }
+
         actualizarTotales();
     }
 
@@ -369,8 +322,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const fechaFormateada = formatearFecha(fecha);
 
         fila.dataset.fecha = fechaFormateada;
-        
-        // CORRECCIÓN: Si es sábado o domingo, añade la clase CSS para sombrear toda la fila
+
+        // Añadir clase si es fin de semana para el sombrado CSS
         if (esFinSemana(fecha)) {
             fila.classList.add("fila-fin-semana");
         }
@@ -383,15 +336,33 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${nombreDia(fecha)}
                     </small>
                 </td>
-                <td data-label="Entrada mañana"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td data-label="Salida mañana"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td data-label="Entrada tarde"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td data-label="Salida tarde"><input type="time"><button class="ahora" type="button">Ahora</button></td>
-                <td class="totalHoras">0:00</td>
-                <td class="horasExtras">0:00</td>
-                <td data-label="Dieta EUR"><input type="number" min="0" max="99.99" step="0.01" value="0.00"></td>
-                <td data-label="Pernocta EUR"><input type="number" min="0" max="999" step="1" value="0"></td>
-                <td data-label="Observaciones"><textarea></textarea></td>
+                <td data-label="Entrada mañana">
+                    <input type="time" aria-label="Entrada mañana ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td data-label="Salida mañana">
+                    <input type="time" aria-label="Salida mañana ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td data-label="Entrada tarde">
+                    <input type="time" aria-label="Entrada tarde ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td data-label="Salida tarde">
+                    <input type="time" aria-label="Salida tarde ${fechaFormateada}">
+                    <button class="ahora" type="button">Ahora</button>
+                </td>
+                <td class="totalHoras" data-label="Total horas">0:00</td>
+                <td class="horasExtras" data-label="Horas extras">0:00</td>
+                <td data-label="Dieta EUR">
+                    <input type="number" min="0" max="99.99" step="0.01" value="0.00" aria-label="Dieta ${fechaFormateada}">
+                </td>
+                <td data-label="Pernocta EUR">
+                    <input type="number" min="0" max="999" step="1" value="0" aria-label="Pernocta ${fechaFormateada}">
+                </td>
+                <td data-label="Observaciones">
+                    <textarea aria-label="Observaciones ${fechaFormateada}"></textarea>
+                </td>
             `;
 
         configurarFila(fila);
@@ -405,20 +376,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                 guardarDatos();
             });
         });
+
         fila.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener("change", () => {
                 actualizarTotales();
                 guardarDatos();
             });
         });
+
         fila.querySelector("textarea").addEventListener("input", () => {
             guardarDatos();
         });
+
         fila.querySelectorAll(".ahora").forEach(btn => {
             btn.addEventListener("click", () => {
                 const input = btn.parentElement.querySelector("input[type='time']");
                 const ahora = new Date();
-                input.value = `${String(ahora.getHours()).padStart(2, "0")}:${String(ahora.getMinutes()).padStart(2, "0")}`;
+                const h = String(ahora.getHours()).padStart(2, "0");
+                const m = String(ahora.getMinutes()).padStart(2, "0");
+
+                input.value = `${h}:${m}`;
                 calcularHorasFila(fila);
                 guardarGPS(fila);
                 guardarDatos();
@@ -433,25 +410,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         const entradaT = tiempos[2].value;
         const salidaT = tiempos[3].value;
 
-        let minutes = 0;
+        let minutos = 0;
+
         if (entradaM && salidaT && !salidaM && !entradaT) {
-            minutes = diferenciaMinutos(entradaM, salidaT);
+            minutos = diferenciaMinutos(entradaM, salidaT);
         } else {
-            minutes += diferenciaMinutos(entradaM, salidaM);
-            minutes += diferenciaMinutos(entradaT, salidaT);
+            minutos += diferenciaMinutos(entradaM, salidaM);
+            minutos += diferenciaMinutos(entradaT, salidaT);
         }
 
-        fila.querySelector(".totalHoras").textContent = convertirMinutos(minutes);
-        calcularExtras(fila, minutes);
+        fila.querySelector(".totalHoras").textContent = convertirMinutos(minutos);
+        calcularExtras(fila, minutos);
         actualizarTotales();
     }
 
     function calcularExtras(fila, minutos) {
         const exceso = minutos - 480;
+
         if (exceso <= 0) {
             fila.querySelector(".horasExtras").textContent = "0:00";
             return;
         }
+
         fila.querySelector(".horasExtras").textContent = convertirMinutos(Math.ceil(exceso / 30) * 30);
     }
 
@@ -467,7 +447,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const extras = fila.querySelector(".horasExtras").textContent;
             const numeros = fila.querySelectorAll("input[type='number']");
 
-            if (horas !== "0:00") totalDias++;
+            if (horas !== "0:00") {
+                totalDias++;
+            }
 
             minutosTrabajados += convertirHorasAMinutos(horas);
             minutesExtras += convertirHorasAMinutos(extras);
@@ -484,7 +466,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function convertirMinutos(minutos) {
         const horas = Math.floor(minutos / 60);
-        const mins = minutos % 60;
+        const mins = minutes % 60;
         return `${horas}:${String(mins).padStart(2, "0")}`;
     }
 
@@ -495,20 +477,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function diferenciaMinutos(inicio, fin) {
         if (!inicio || !fin) return 0;
+
         const [h1, m1] = inicio.split(":").map(Number);
         const [h2, m2] = fin.split(":").map(Number);
         const diferencia = (h2 * 60 + m2) - (h1 * 60 + m1);
+
         return Math.max(0, diferencia);
     }
 
     function guardarGPS(fila) {
         if (!navigator.geolocation) return;
+
         navigator.geolocation.getCurrentPosition(pos => {
             fila.dataset.gps = JSON.stringify({
                 lat: pos.coords.latitude,
                 lon: pos.coords.longitude,
                 fecha: new Date().toISOString()
             });
+
             guardarDatos();
         });
     }
@@ -516,9 +502,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     function recogerDatos() {
         const filas = document.querySelectorAll("#tablaBody tr");
         const datos = [];
+
         filas.forEach(fila => {
             const tiempos = fila.querySelectorAll("input[type='time']");
             const numeros = fila.querySelectorAll("input[type='number']");
+
             datos.push({
                 fecha: fila.dataset.fecha,
                 entradaM: tiempos[0].value,
@@ -531,21 +519,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                 gps: fila.dataset.gps || ""
             });
         });
+
         return datos;
     }
 
     async function guardarDatos(sincronizarNube = false) {
         const datos = recogerDatos();
         const periodo = obtenerPeriodo();
+
         guardarDatosLocales(periodo, datos, observacionesFinales.value);
 
         if (!sincronizarNube) return;
+
         const guardadoEnNube = await guardarDatosEnNube(periodo, datos);
-        alert(guardadoEnNube ? "Datos guardados en la nube." : "Guardado localmente.");
+
+        alert(guardadoEnNube
+            ? "Datos guardados en la nube correctamente"
+            : "Datos guardados solo en este dispositivo. Inicia sesión para guardarlos en la nube.");
     }
 
     function guardarDatosLocales(periodo, datos, observaciones) {
         if (!periodo) return;
+
         const mapa = leerJornadasPorPeriodo();
         mapa[periodo] = { datos, observaciones };
         localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
@@ -554,6 +549,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function guardarDatosEnNube(periodo, datos, mostrarError = true) {
         if (!supabaseClient || !periodo) return false;
+
         const user = await actualizarEstadoSesion();
         if (!user) return false;
 
@@ -565,13 +561,23 @@ document.addEventListener("DOMContentLoaded", async () => {
                 datos,
                 observaciones_finales: observacionesFinales.value,
                 updated_at: new Date().toISOString()
-            }, { onConflict: "user_id,periodo" });
+            }, {
+                onConflict: "user_id,periodo"
+            });
 
-        return !error;
+        if (error) {
+            if (mostrarError) {
+                alert(`No se pudo guardar en Supabase: ${error.message}`);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     async function borrarPeriodoEnNube(periodo) {
         if (!supabaseClient || !periodo) return false;
+
         const user = await actualizarEstadoSesion();
         if (!user) return false;
 
@@ -580,7 +586,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             .delete()
             .eq("user_id", user.id)
             .eq("periodo", periodo);
-        return !error;
+
+        if (error) {
+            alert(`No se pudo borrar el periodo en Supabase: ${error.message}`);
+            return false;
+        }
+
+        return true;
     }
 
     function limpiarPantalla() {
@@ -588,7 +600,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         localStorage.removeItem(STORAGE_PERIODO_ACTIVO);
         authPassword.value = "";
         observacionesFinales.value = "";
-        iniciarPeriodo();
+
+        const hoy = new Date();
+        periodoMes.value = String(hoy.getMonth() + 1).padStart(2, "0");
+        periodoAnio.value = String(hoy.getFullYear());
+        periodoEnPantalla = obtenerPeriodo();
+        localStorage.setItem(STORAGE_PERIODO_ACTIVO, periodoEnPantalla);
+        generarPeriodo();
+        actualizarTotales();
     }
 
     function aplicarDatoAFila(fila, dato) {
@@ -603,8 +622,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         numeros[1].value = dato.pernocta || "0";
         fila.querySelector("textarea").value = dato.observacion || "";
 
-        if (dato.gps) fila.dataset.gps = dato.gps;
-        else delete fila.dataset.gps;
+        if (dato.gps) {
+            fila.dataset.gps = dato.gps;
+        } else {
+            delete fila.dataset.gps;
+        }
 
         calcularHorasFila(fila);
     }
@@ -620,24 +642,34 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const datosPorFecha = Object.fromEntries(entrada.datos.map(d => [d.fecha, d]));
+        const datosPorFecha = Object.fromEntries(
+            entrada.datos.map(dato => [dato.fecha, dato])
+        );
+
         document.querySelectorAll("#tablaBody tr").forEach(fila => {
             const dato = datosPorFecha[fila.dataset.fecha];
-            if (dato) aplicarDatoAFila(fila, dato);
+            if (!dato) return;
+
+            aplicarDatoAFila(fila, dato);
         });
+
         actualizarTotales();
     }
 
     async function cargarDatosGuardados(mostrarAviso = true) {
         const cargadoDeNube = await cargarDatosDesdeNube();
         cargarDatos();
+
         if (mostrarAviso) {
-            alert(cargadoDeNube ? "Historial completo sincronizado desde la nube." : "Datos cargados localmente.");
+            alert(cargadoDeNube
+                ? "Todos los periodos históricos se han descargado y cargado con éxito desde la nube."
+                : "Datos cargados desde este dispositivo. Para sincronizar desde la nube, inicia sesión y vuelve a intentarlo.");
         }
     }
 
     async function cargarDatosDesdeNube() {
         if (!supabaseClient) return false;
+
         const user = await actualizarEstadoSesion();
         if (!user) return false;
 
@@ -646,7 +678,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             .select("periodo, datos, observaciones_finales")
             .eq("user_id", user.id);
 
-        if (error || !data || data.length === 0) return false;
+        if (error) {
+            alert(`No se pudo cargar desde Supabase: ${error.message}`);
+            return false;
+        }
+
+        if (!data || data.length === 0) return false;
 
         const mapa = leerJornadasPorPeriodo();
         data.forEach(row => {
@@ -655,18 +692,23 @@ document.addEventListener("DOMContentLoaded", async () => {
                 observaciones: row.observaciones_finales || ""
             };
         });
+
         localStorage.setItem(STORAGE_JORNADAS, JSON.stringify(mapa));
         return true;
     }
 
     function formatearFecha(fecha) {
-        return `${String(fecha.getDate()).padStart(2, "0")}/${String(fecha.getMonth() + 1).padStart(2, "0")}/${fecha.getFullYear()}`;
+        const d = String(fecha.getDate()).padStart(2, "0");
+        const m = String(fecha.getMonth() + 1).padStart(2, "0");
+        const y = fecha.getFullYear();
+        return `${d}/${m}/${y}`;
     }
 
     function nombreDia(fecha) {
-        return ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"][fecha.getDay()];
+        const dias = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+        return dias[fecha.getDay()];
     }
-    
+
     function esFinSemana(fecha) {
         return fecha.getDay() === 0 || fecha.getDay() === 6;
     }

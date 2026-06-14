@@ -1,27 +1,38 @@
-/* Sombreado para las filas de Sábado y Domingo */
+/* --- NUEVOS ESTILOS AÑADIDOS --- */
+
+/* Sombreado gris suave para las filas de Sábado y Domingo */
 #tablaBody tr.fila-fin-semana {
-    background-color: #f1f5f9 !important; /* Gris suave / azulado elegante */
+    background-color: #f2f5f8 !important;
 }
 
-/* Resalte adicional para la celda de la fecha en fin de semana */
+/* Oscurecer ligeramente la celda de la fecha en fines de semana para que resalte */
 #tablaBody tr.fila-fin-semana td.fecha {
-    background-color: #e2e8f0 !important;
+    background-color: #e4e9f0 !important;
     font-weight: bold;
 }
 
-/* Estilo del botón Refrescar para que combine en el panel de autenticación */
+/* Estilo para el botón Refrescar */
 #btnRefrescar {
-    background-color: #64748b; /* Color gris azulado neutro */
+    background-color: #6c757d;
     color: white;
     border: none;
-    padding: 8px 14px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
     border-radius: 4px;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
     transition: background 0.2s;
 }
 
 #btnRefrescar:hover {
-    background-color: #475569;
+    background-color: #5a6268;
+}
+
+/* Asegurar que el sombreado se vea bien en pantallas móviles */
+@media (max-width: 768px) {
+    #tablaBody tr.fila-fin-semana {
+        border: 2px solid #cbd5e1;
+        background-color: #f8fafc !important;
+        margin-bottom: 15px;
+    }
 }
