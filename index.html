@@ -12,8 +12,8 @@
     <h1>CONTROL DE JORNADA LABORAL</h1>
 
     <div class="datosTrabajador">
-        <h2>Ricardo Orío Yangüela</h2>
-        <p>DNI: 16635902W</p>
+        <h2 id="perfilNombre">Sin perfil cargado</h2>
+        <p>DNI/NIE: <span id="perfilDni">Sin datos</span></p>
         <p class="periodoResumen">Periodo: <span id="periodoActual">Sin generar</span></p>
         <p id="estadoGuardado" class="estadoGuardado" aria-live="polite">Listo</p>
     </div>
@@ -22,6 +22,8 @@
         <p id="authStatus">Sin iniciar sesión</p>
         <input type="email" id="authEmail" placeholder="Email" autocomplete="email" aria-label="Email">
         <input type="password" id="authPassword" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña">
+        <input type="text" id="perfilNombreInput" placeholder="Nombre completo" autocomplete="name" aria-label="Nombre completo">
+        <input type="text" id="perfilDniInput" placeholder="DNI/NIE" aria-label="DNI o NIE">
         <button id="btnRefrescar" type="button">Refrescar</button>
         <button id="btnLogin" type="button">Entrar</button>
         <button id="btnRegistro" type="button">Crear cuenta</button>

@@ -76,6 +76,14 @@ h1{
     min-width:220px;
 }
 
+#perfilNombreInput{
+    min-width:260px;
+}
+
+#perfilDniInput{
+    min-width:130px;
+}
+
 .btnAccionesMenu{
     display:flex;
     align-items:center;

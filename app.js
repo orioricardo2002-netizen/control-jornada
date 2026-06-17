@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const authStatus = document.getElementById("authStatus");
     const authEmail = document.getElementById("authEmail");
     const authPassword = document.getElementById("authPassword");
+    const perfilNombreInput = document.getElementById("perfilNombreInput");
+    const perfilDniInput = document.getElementById("perfilDniInput");
+    const perfilNombre = document.getElementById("perfilNombre");
+    const perfilDni = document.getElementById("perfilDni");
     const periodoMes = document.getElementById("periodoMes");
     const periodoAnio = document.getElementById("periodoAnio");
     const periodoActual = document.getElementById("periodoActual");
@@ -29,6 +33,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const STORAGE_JORNADAS = "jornadasPorPeriodo";
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
+    const PERFIL_PREDEFINIDO = {
+        email: "orioricardo2002@gmail.com",
+        nombre_completo: "Ricardo Orío Yangüela",
+        dni_nie: "16635902W"
+    };
     let periodoEnPantalla = "";
 
     // Inicializar desplegable de años dinámicamente
@@ -132,6 +141,86 @@ document.addEventListener("DOMContentLoaded", async () => {
         return user;
     }
 
+    function pintarPerfil(perfil = null) {
+        perfilNombre.textContent = perfil?.nombre_completo || "Sin perfil cargado";
+        perfilDni.textContent = perfil?.dni_nie || "Sin datos";
+        perfilNombreInput.value = perfil?.nombre_completo || "";
+        perfilDniInput.value = perfil?.dni_nie || "";
+    }
+
+    function obtenerPerfilFormulario() {
+        return {
+            nombre_completo: perfilNombreInput.value.trim(),
+            dni_nie: perfilDniInput.value.trim().toUpperCase()
+        };
+    }
+
+    function obtenerPerfilPredefinido(email) {
+        return email?.toLowerCase() === PERFIL_PREDEFINIDO.email
+            ? PERFIL_PREDEFINIDO
+            : null;
+    }
+
+    async function cargarPerfilUsuario(user) {
+        if (!supabaseClient || !user) {
+            pintarPerfil();
+            return null;
+        }
+
+        const { data, error } = await supabaseClient
+            .from("perfiles")
+            .select("nombre_completo, dni_nie")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error("No se pudo cargar el perfil", error);
+            pintarPerfil(obtenerPerfilPredefinido(user.email));
+            return null;
+        }
+
+        if (data) {
+            pintarPerfil(data);
+            return data;
+        }
+
+        const perfilBase = obtenerPerfilPredefinido(user.email);
+        if (perfilBase) {
+            await guardarPerfilUsuario(user, perfilBase, false);
+            pintarPerfil(perfilBase);
+            return perfilBase;
+        }
+
+        pintarPerfil();
+        return null;
+    }
+
+    async function guardarPerfilUsuario(user, perfil, mostrarError = true) {
+        if (!supabaseClient || !user) return false;
+
+        const { error } = await supabaseClient
+            .from("perfiles")
+            .upsert({
+                user_id: user.id,
+                email: user.email,
+                nombre_completo: perfil.nombre_completo,
+                dni_nie: perfil.dni_nie,
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: "user_id"
+            });
+
+        if (error) {
+            if (mostrarError) {
+                alert(`No se pudo guardar el perfil: ${error.message}`);
+            }
+            return false;
+        }
+
+        pintarPerfil(perfil);
+        return true;
+    }
+
     async function iniciarSesion() {
         if (!supabaseClient) return;
 
@@ -154,7 +243,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         authPassword.value = "";
-        await actualizarEstadoSesion();
+        const user = await actualizarEstadoSesion();
+        await cargarPerfilUsuario(user);
         await cargarDatosGuardados(false);
         actualizarEstadoGuardado("Sesión iniciada", "nube");
     }
@@ -164,15 +254,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const email = authEmail.value.trim();
         const password = authPassword.value;
+        const perfil = obtenerPerfilFormulario();
 
-        if (!email || !password) {
-            alert("Introduce email y contraseña");
+        if (!email || !password || !perfil.nombre_completo || !perfil.dni_nie) {
+            alert("Introduce email, contraseña, nombre completo y DNI/NIE");
             return;
         }
 
         const { error } = await supabaseClient.auth.signUp({
             email,
-            password
+            password,
+            options: {
+                data: {
+                    nombre_completo: perfil.nombre_completo,
+                    dni_nie: perfil.dni_nie
+                }
+            }
         });
 
         if (error) {
@@ -181,7 +278,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         authPassword.value = "";
-        await actualizarEstadoSesion();
+        const user = await actualizarEstadoSesion();
+        if (user) {
+            await guardarPerfilUsuario(user, perfil);
+        }
         actualizarEstadoGuardado("Cuenta creada", "nube");
         alert("Cuenta creada. Si Supabase te envía un email de confirmación, confírmalo antes de entrar.");
     }
@@ -195,6 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         await supabaseClient.auth.signOut();
         await actualizarEstadoSesion();
+        pintarPerfil();
         limpiarPantalla();
 
         alert(guardadoEnNube
@@ -309,7 +410,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     migrarStorageAntiguo();
     iniciarPeriodo();
-    await actualizarEstadoSesion();
+    const userInicial = await actualizarEstadoSesion();
+    await cargarPerfilUsuario(userInicial);
 
     function obtenerPeriodo() {
         const mes = periodoMes.value;
