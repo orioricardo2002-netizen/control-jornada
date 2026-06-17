@@ -28,6 +28,32 @@ h1{
     font-weight:bold;
 }
 
+.estadoGuardado{
+    display:inline-block;
+    margin:4px 0 0;
+    padding:4px 8px;
+    border-radius:5px;
+    background:#eef2f7;
+    color:#334155;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.estadoGuardado[data-tipo="local"]{
+    background:#fff7e6;
+    color:#7a4b00;
+}
+
+.estadoGuardado[data-tipo="nube"]{
+    background:#e8f5ee;
+    color:#17633a;
+}
+
+.estadoGuardado[data-tipo="error"]{
+    background:#fdecec;
+    color:#8a1f1f;
+}
+
 .authPanel{
     margin-bottom:18px;
     display:flex;
@@ -188,7 +214,7 @@ th{
 }
 
 tr.fila-fin-semana {
-    background-color: #f9f9f9; /* Sombreado gris para fin de semana */
+    background-color: #e8eef6; /* Sombreado gris azulado para fin de semana */
 }
 
 input[type="time"]{

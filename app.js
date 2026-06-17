@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnGuardar = document.getElementById("btnGuardar");
     const btnCargar = document.getElementById("btnCargar");
     const btnPdf = document.getElementById("btnPdf");
+    const btnCsv = document.getElementById("btnCsv");
     const btnLimpiarPeriodo = document.getElementById("btnLimpiarPeriodo");
     const btnAccionesMenu = document.getElementById("btnAccionesMenu");
     const accionesMenu = document.getElementById("accionesMenu");
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const periodoMes = document.getElementById("periodoMes");
     const periodoAnio = document.getElementById("periodoAnio");
     const periodoActual = document.getElementById("periodoActual");
+    const estadoGuardado = document.getElementById("estadoGuardado");
     const observacionesFinales = document.getElementById("observacionesFinales");
     const tbody = document.getElementById("tablaBody");
 
@@ -65,19 +67,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.print();
     });
 
+    btnCsv.addEventListener("click", exportarCSV);
+
     btnLimpiarPeriodo.addEventListener("click", limpiarPeriodo);
     btnLogin.addEventListener("click", iniciarSesion);
     btnRegistro.addEventListener("click", crearCuenta);
     btnLogout.addEventListener("click", cerrarSesion);
 
     observacionesFinales.addEventListener("input", () => {
-        guardarDatos();
+        marcarCambioLocal();
     });
 
     function inicializarSelectorAnios() {
         const anioActual = new Date().getFullYear();
-        const anioInicio = anioActual - 3; 
-        const anioFin = anioActual + 5; 
+        const anioInicio = 2025;
+        const anioFin = 2035;
 
         periodoAnio.innerHTML = "";
         for (let i = anioInicio; i <= anioFin; i++) {
@@ -89,6 +93,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             periodoAnio.appendChild(option);
         }
+
+        if (anioActual < anioInicio || anioActual > anioFin) {
+            periodoAnio.value = String(anioInicio);
+        }
+    }
+
+    function actualizarEstadoGuardado(mensaje, tipo = "neutro") {
+        estadoGuardado.textContent = mensaje;
+        estadoGuardado.dataset.tipo = tipo;
+    }
+
+    function marcarCambioLocal(fila = null) {
+        if (fila) {
+            calcularHorasFila(fila);
+        } else {
+            actualizarTotales();
+        }
+
+        guardarDatos();
+        actualizarEstadoGuardado("Cambios guardados en este dispositivo", "local");
     }
 
     async function actualizarEstadoSesion() {
@@ -132,6 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         authPassword.value = "";
         await actualizarEstadoSesion();
         await cargarDatosGuardados(false);
+        actualizarEstadoGuardado("Sesión iniciada", "nube");
     }
 
     async function crearCuenta() {
@@ -157,6 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         authPassword.value = "";
         await actualizarEstadoSesion();
+        actualizarEstadoGuardado("Cuenta creada", "nube");
         alert("Cuenta creada. Si Supabase te envía un email de confirmación, confírmalo antes de entrar.");
     }
 
@@ -200,6 +226,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert(borradoEnNube
             ? "Periodo limpiado en este dispositivo y en la nube."
             : "Periodo limpiado en este dispositivo.");
+        actualizarEstadoGuardado("Periodo limpiado", "local");
     }
 
     function migrarStorageAntiguo() {
@@ -364,20 +391,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     function configurarFila(fila) {
         fila.querySelectorAll('input[type="time"]').forEach(input => {
             input.addEventListener("change", () => {
-                calcularHorasFila(fila);
-                guardarDatos();
+                marcarCambioLocal(fila);
+            });
+            input.addEventListener("input", () => {
+                marcarCambioLocal(fila);
             });
         });
 
         fila.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener("change", () => {
-                actualizarTotales();
-                guardarDatos();
+                marcarCambioLocal();
+            });
+            input.addEventListener("input", () => {
+                marcarCambioLocal();
             });
         });
 
         fila.querySelector("textarea").addEventListener("input", () => {
-            guardarDatos();
+            marcarCambioLocal();
         });
 
         fila.querySelectorAll(".ahora").forEach(btn => {
@@ -388,9 +419,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const m = String(ahora.getMinutes()).padStart(2, "0");
 
                 input.value = `${h}:${m}`;
-                calcularHorasFila(fila);
                 guardarGPS(fila);
-                guardarDatos();
+                marcarCambioLocal(fila);
             });
         });
     }
@@ -509,6 +539,81 @@ document.addEventListener("DOMContentLoaded", async () => {
         return datos;
     }
 
+    function exportarCSV() {
+        guardarDatos();
+
+        const periodo = obtenerPeriodo() || "periodo";
+        const datos = recogerDatos();
+        const filas = [
+            [
+                "Fecha",
+                "Entrada mañana",
+                "Salida mañana",
+                "Entrada tarde",
+                "Salida tarde",
+                "Total horas",
+                "Horas extras",
+                "Dieta EUR",
+                "Pernocta EUR",
+                "Observaciones"
+            ]
+        ];
+
+        document.querySelectorAll("#tablaBody tr").forEach((fila, index) => {
+            const dato = datos[index] || {};
+            filas.push([
+                dato.fecha || "",
+                dato.entradaM || "",
+                dato.salidaM || "",
+                dato.entradaT || "",
+                dato.salidaT || "",
+                fila.querySelector(".totalHoras")?.textContent || "0:00",
+                fila.querySelector(".horasExtras")?.textContent || "0:00",
+                dato.dieta || "0.00",
+                dato.pernocta || "0",
+                dato.observacion || ""
+            ]);
+        });
+
+        filas.push([]);
+        filas.push(["Total días trabajados", document.getElementById("totalDias").textContent]);
+        filas.push(["Total horas trabajadas", document.getElementById("totalHoras").textContent]);
+        filas.push(["Total horas extras", document.getElementById("totalExtras").textContent]);
+        filas.push(["Total dietas EUR", document.getElementById("totalDietas").textContent]);
+        filas.push(["Total pernoctas EUR", document.getElementById("totalPernoctas").textContent]);
+        filas.push(["Observaciones finales", observacionesFinales.value]);
+
+        const contenido = filas
+            .map(fila => fila.map(escaparCSV).join(";"))
+            .join("\r\n");
+
+        descargarArchivo(
+            `jornada-${periodo}.csv`,
+            "\uFEFF" + contenido,
+            "text/csv;charset=utf-8"
+        );
+
+        actualizarEstadoGuardado("CSV exportado", "nube");
+    }
+
+    function escaparCSV(valor) {
+        const texto = String(valor ?? "");
+        return `"${texto.replace(/"/g, '""')}"`;
+    }
+
+    function descargarArchivo(nombre, contenido, tipo) {
+        const blob = new Blob([contenido], { type: tipo });
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement("a");
+
+        enlace.href = url;
+        enlace.download = nombre;
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+        URL.revokeObjectURL(url);
+    }
+
     async function guardarDatos(sincronizarNube = false) {
         const datos = recogerDatos();
         const periodo = obtenerPeriodo();
@@ -522,6 +627,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert(guardadoEnNube
             ? "Datos guardados en la nube correctamente"
             : "Datos guardados solo en este dispositivo.");
+        actualizarEstadoGuardado(
+            guardadoEnNube ? "Sincronizado con la nube" : "Guardado en este dispositivo",
+            guardadoEnNube ? "nube" : "local"
+        );
     }
 
     function guardarDatosLocales(periodo, datos, observaciones) {
@@ -645,6 +754,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? "Datos cargados desde la nube"
                 : "Datos cargados desde este dispositivo.");
         }
+        actualizarEstadoGuardado(
+            cargadoDeNube ? "Datos cargados desde la nube" : "Datos cargados desde este dispositivo",
+            cargadoDeNube ? "nube" : "local"
+        );
     }
 
     async function cargarDatosDesdeNube() {
