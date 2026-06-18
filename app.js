@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnAccionesMenu = document.getElementById("btnAccionesMenu");
     const accionesMenu = document.getElementById("accionesMenu");
     const accionesPanel = document.querySelector(".accionesPanel");
-    const btnRefrescar = document.getElementById("btnRefrescar");
     const btnLogin = document.getElementById("btnLogin");
     const btnRegistro = document.getElementById("btnRegistro");
     const btnLogout = document.getElementById("btnLogout");
@@ -33,21 +32,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const STORAGE_JORNADAS = "jornadasPorPeriodo";
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
+    const RETRASO_SINCRONIZACION_MS = 1500;
     const PERFIL_PREDEFINIDO = {
         email: "orioricardo2002@gmail.com",
         nombre_completo: "Ricardo Orío Yangüela",
         dni_nie: "16635902W"
     };
     let periodoEnPantalla = "";
+    let temporizadorSincronizacion = null;
 
     // Inicializar desplegable de años dinámicamente
     inicializarSelectorAnios();
-
-    if (btnRefrescar) {
-        btnRefrescar.addEventListener("click", () => {
-            window.location.reload(true);
-        });
-    }
 
     btnAccionesMenu.addEventListener("click", () => {
         const abierto = accionesPanel.classList.toggle("abierto");
@@ -121,7 +116,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         guardarDatos();
-        actualizarEstadoGuardado("Cambios guardados en este dispositivo", "local");
+        actualizarEstadoGuardado("Cambios pendientes de sincronizar", "local");
+        programarSincronizacionNube();
+    }
+
+    function programarSincronizacionNube() {
+        window.clearTimeout(temporizadorSincronizacion);
+        temporizadorSincronizacion = window.setTimeout(sincronizarNubeSilenciosamente, RETRASO_SINCRONIZACION_MS);
+    }
+
+    async function sincronizarNubeSilenciosamente() {
+        const user = await actualizarEstadoSesion();
+
+        if (!user) {
+            actualizarEstadoGuardado("Cambios guardados en este dispositivo", "local");
+            return;
+        }
+
+        actualizarEstadoGuardado("Sincronizando con la nube...", "local");
+
+        const periodo = obtenerPeriodo();
+        const datos = recogerDatos();
+        const guardadoEnNube = await guardarDatosEnNube(periodo, datos, false);
+
+        actualizarEstadoGuardado(
+            guardadoEnNube ? "Sincronizado con la nube" : "Pendiente de sincronizar",
+            guardadoEnNube ? "nube" : "local"
+        );
     }
 
     async function actualizarEstadoSesion() {
@@ -137,6 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ? `Sesión iniciada: ${user.email}`
             : "Sin iniciar sesión";
 
+        document.querySelector(".authPanel").classList.toggle("sesionActiva", Boolean(user));
         btnLogout.disabled = !user;
         return user;
     }
@@ -448,6 +470,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (esFinSemana(fecha)) {
             fila.classList.add("fila-fin-semana");
         }
+        if (fechaFormateada === formatearFecha(new Date())) {
+            fila.classList.add("fila-hoy");
+        }
 
         fila.innerHTML = `
                 <td class="fecha" data-label="Fecha">
@@ -546,6 +571,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         fila.querySelector(".totalHoras").textContent = convertirMinutos(minutos);
         calcularExtras(fila, minutos);
         actualizarTotales();
+        irAlDiaActual();
+    }
+
+    function irAlDiaActual() {
+        const filaHoy = document.querySelector("#tablaBody .fila-hoy");
+
+        if (!filaHoy) return;
+
+        window.setTimeout(() => {
+            filaHoy.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "nearest"
+            });
+        }, 100);
     }
 
     function calcularExtras(fila, minutos) {
