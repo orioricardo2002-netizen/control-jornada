@@ -460,6 +460,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             fecha.setDate(fecha.getDate() + 1);
         }
         actualizarTotales();
+        irAlDiaActual();
     }
 
     function crearFilaDia(fecha) {
@@ -571,7 +572,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         fila.querySelector(".totalHoras").textContent = convertirMinutos(minutos);
         calcularExtras(fila, minutos);
         actualizarTotales();
-        irAlDiaActual();
     }
 
     function irAlDiaActual() {
@@ -867,6 +867,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (!entrada?.datos?.length) {
             actualizarTotales();
+            irAlDiaActual();
             return;
         }
 
@@ -882,6 +883,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         actualizarTotales();
+        irAlDiaActual();
     }
 
     async function cargarDatosGuardados(mostrarAviso = true) {
