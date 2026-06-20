@@ -40,6 +40,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     let periodoEnPantalla = "";
     let temporizadorSincronizacion = null;
+    let hayCambiosLocalesPendientes = false;
+    let cargaAutomaticaEnCurso = false;
 
     // Inicializar desplegable de años dinámicamente
     inicializarSelectorAnios();
@@ -115,6 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             actualizarTotales();
         }
 
+        hayCambiosLocalesPendientes = true;
         guardarDatos();
         actualizarEstadoGuardado("Cambios pendientes de sincronizar", "local");
         programarSincronizacionNube();
@@ -143,6 +146,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             guardadoEnNube ? "Sincronizado con la nube" : "Pendiente de sincronizar",
             guardadoEnNube ? "nube" : "local"
         );
+
+        if (guardadoEnNube) {
+            hayCambiosLocalesPendientes = false;
+        }
     }
 
     async function actualizarEstadoSesion() {
@@ -268,7 +275,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const user = await actualizarEstadoSesion();
         await cargarPerfilUsuario(user);
         await cargarDatosGuardados(false);
-        actualizarEstadoGuardado("Sesión iniciada", "nube");
     }
 
     async function crearCuenta() {
@@ -407,7 +413,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         cargarDatos();
     }
 
-    function cambiarMesActivo() {
+    async function cambiarMesActivo() {
         const periodoActualGuardar = periodoEnPantalla || obtenerPeriodo();
 
         if (periodoActualGuardar && tbody.querySelectorAll("tr").length > 0) {
@@ -424,16 +430,37 @@ document.addEventListener("DOMContentLoaded", async () => {
         periodoEnPantalla = nuevoPeriodo;
         localStorage.setItem(STORAGE_PERIODO_ACTIVO, nuevoPeriodo);
         generarPeriodo();
-        cargarDatos();
+
+        const user = await actualizarEstadoSesion();
+        if (user) {
+            await cargarDatosGuardados(false);
+        } else {
+            cargarDatos();
+        }
     }
 
     periodoMes.addEventListener("change", cambiarMesActivo);
     periodoAnio.addEventListener("change", cambiarMesActivo);
+    window.addEventListener("focus", cargarNubeAutomaticamente);
+    window.addEventListener("online", cargarNubeAutomaticamente);
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            cargarNubeAutomaticamente();
+        }
+    });
+    window.setInterval(() => {
+        if (document.visibilityState === "visible") {
+            cargarNubeAutomaticamente();
+        }
+    }, 60000);
 
     migrarStorageAntiguo();
     iniciarPeriodo();
     const userInicial = await actualizarEstadoSesion();
     await cargarPerfilUsuario(userInicial);
+    if (userInicial) {
+        await cargarDatosGuardados(false);
+    }
 
     function obtenerPeriodo() {
         const mes = periodoMes.value;
@@ -773,6 +800,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             guardadoEnNube ? "Sincronizado con la nube" : "Guardado en este dispositivo",
             guardadoEnNube ? "nube" : "local"
         );
+
+        if (guardadoEnNube) {
+            hayCambiosLocalesPendientes = false;
+        }
     }
 
     function guardarDatosLocales(periodo, datos, observaciones) {
@@ -924,7 +955,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         guardarDatosLocales(periodo, data.datos || [], data.observaciones_finales || "");
         periodoEnPantalla = periodo;
         cargarDatos();
+        hayCambiosLocalesPendientes = false;
         return true;
+    }
+
+    async function cargarNubeAutomaticamente() {
+        if (hayCambiosLocalesPendientes || cargaAutomaticaEnCurso) return;
+
+        const user = await actualizarEstadoSesion();
+        if (!user) return;
+
+        cargaAutomaticaEnCurso = true;
+        try {
+            await cargarDatosGuardados(false);
+        } finally {
+            cargaAutomaticaEnCurso = false;
+        }
     }
 
     function formatearFecha(fecha) {
