@@ -621,7 +621,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             fila.querySelector(".horasExtras").textContent = "0:00";
             return;
         }
-        fila.querySelector(".horasExtras").textContent = convertirMinutos(Math.ceil(exceso / 30) * 30);
+        const minutosExtras = Math.floor((exceso + 20) / 30) * 30;
+        fila.querySelector(".horasExtras").textContent = convertirMinutos(minutosExtras);
     }
 
     function actualizarTotales() {
