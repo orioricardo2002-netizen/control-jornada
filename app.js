@@ -70,8 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     btnPdf.addEventListener("click", async () => {
         await guardarDatos(true);
-        prepararImpresion();
-        window.print();
+        exportarPDF();
     });
 
     window.addEventListener("beforeprint", prepararImpresion);
@@ -734,14 +733,182 @@ document.addEventListener("DOMContentLoaded", async () => {
         return datos;
     }
 
+    function obtenerDatosExportacion() {
+        const filas = Array.from(document.querySelectorAll("#tablaBody tr"));
+
+        return filas.map(fila => {
+            const tiempos = fila.querySelectorAll("input[type='time']");
+            const numeros = fila.querySelectorAll("input[type='number']");
+            const fecha = fila.dataset.fecha || "";
+            const dia = fila.querySelector(".fecha small")?.textContent.trim() || "";
+
+            return {
+                fecha,
+                dia,
+                entradaM: tiempos[0]?.value || "--",
+                salidaM: tiempos[1]?.value || "--",
+                entradaT: tiempos[2]?.value || "--",
+                salidaT: tiempos[3]?.value || "--",
+                totalHoras: fila.querySelector(".totalHoras")?.textContent || "0:00",
+                horasExtras: fila.querySelector(".horasExtras")?.textContent || "0:00",
+                dieta: numeros[0]?.value || "0.00",
+                pernocta: numeros[1]?.value || "0",
+                observacion: fila.querySelector("textarea")?.value.trim() || "--",
+                finSemana: fila.classList.contains("fila-fin-semana"),
+                hoy: fila.classList.contains("fila-hoy")
+            };
+        });
+    }
+
+    function exportarPDF() {
+        const jspdf = window.jspdf;
+
+        if (!jspdf?.jsPDF) {
+            prepararImpresion();
+            window.print();
+            return;
+        }
+
+        const periodo = obtenerPeriodo() || "periodo";
+        const doc = new jspdf.jsPDF({
+            orientation: "portrait",
+            unit: "pt",
+            format: "letter"
+        });
+        const filasExportacion = obtenerDatosExportacion();
+        const azul = [31, 78, 121];
+        const azulClaro = [232, 238, 246];
+        const amarillo = [255, 242, 184];
+        const naranja = [209, 154, 0];
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("CONTROL DE JORNADA LABORAL", 306, 24, { align: "center" });
+        doc.setFontSize(8);
+        doc.text(perfilNombre.textContent || "", 306, 39, { align: "center" });
+        doc.setFont("helvetica", "normal");
+        doc.text(`DNI/NIE: ${perfilDni.textContent || ""}`, 306, 52, { align: "center" });
+        doc.setFont("helvetica", "bold");
+        doc.text(`Periodo: ${periodoActual.textContent || ""}`, 306, 65, { align: "center" });
+
+        doc.autoTable({
+            startY: 80,
+            margin: { left: 36, right: 36 },
+            tableWidth: 540,
+            theme: "grid",
+            head: [[
+                "Fecha",
+                "Ent. M",
+                "Sal. M",
+                "Ent. T",
+                "Sal. T",
+                "Total Horas",
+                "Horas Extras",
+                "Dieta EUR",
+                "Pernocta EUR",
+                "Observaciones"
+            ]],
+            body: filasExportacion.map(fila => [
+                `${fila.fecha}\n${fila.dia}`,
+                fila.entradaM,
+                fila.salidaM,
+                fila.entradaT,
+                fila.salidaT,
+                fila.totalHoras,
+                fila.horasExtras,
+                fila.dieta,
+                fila.pernocta,
+                fila.observacion
+            ]),
+            styles: {
+                font: "helvetica",
+                fontSize: 5.2,
+                cellPadding: 1.1,
+                lineColor: [190, 190, 190],
+                lineWidth: 0.35,
+                halign: "center",
+                valign: "middle",
+                overflow: "linebreak"
+            },
+            headStyles: {
+                fillColor: azul,
+                textColor: [255, 255, 255],
+                fontStyle: "bold",
+                fontSize: 4.8,
+                halign: "center"
+            },
+            columnStyles: {
+                0: { cellWidth: 50 },
+                1: { cellWidth: 48 },
+                2: { cellWidth: 48 },
+                3: { cellWidth: 48 },
+                4: { cellWidth: 48 },
+                5: { cellWidth: 36 },
+                6: { cellWidth: 38 },
+                7: { cellWidth: 35 },
+                8: { cellWidth: 40 },
+                9: { cellWidth: 149, halign: "left" }
+            },
+            didParseCell: data => {
+                if (data.section !== "body") return;
+
+                const fila = filasExportacion[data.row.index];
+
+                if (fila?.finSemana) {
+                    data.cell.styles.fillColor = azulClaro;
+                }
+
+                if (fila?.hoy) {
+                    data.cell.styles.fillColor = amarillo;
+                    data.cell.styles.lineColor = naranja;
+                    data.cell.styles.lineWidth = 0.8;
+                }
+
+                if (data.column.index === 0 && fila?.finSemana) {
+                    data.cell.styles.textColor = [204, 0, 0];
+                    data.cell.styles.fontStyle = "bold";
+                }
+            }
+        });
+
+        const yFinal = doc.lastAutoTable.finalY + 12;
+        doc.setDrawColor(120);
+        doc.setLineWidth(0.4);
+        doc.line(36, yFinal - 5, 576, yFinal - 5);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+
+        [
+            `Total Dias Trabajados: ${document.getElementById("totalDias").textContent}`,
+            `Total Horas Trabajadas: ${document.getElementById("totalHoras").textContent}`,
+            `Total Horas Extras: ${document.getElementById("totalExtras").textContent}`,
+            `Total Dietas: ${document.getElementById("totalDietas").textContent} EUR`,
+            `Total Pernoctas: ${document.getElementById("totalPernoctas").textContent} EUR`
+        ].forEach((linea, index) => {
+            doc.text(linea, 36, yFinal + (index * 12));
+        });
+
+        doc.text("Observaciones Finales", 36, yFinal + 68);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6);
+
+        if (observacionesFinales.value.trim()) {
+            doc.text(doc.splitTextToSize(observacionesFinales.value.trim(), 540), 36, yFinal + 80);
+        }
+
+        doc.save(`jornada-${periodo}.pdf`);
+        actualizarEstadoGuardado("PDF exportado", "nube");
+    }
+
     function exportarCSV() {
         guardarDatos();
 
         const periodo = obtenerPeriodo() || "periodo";
-        const datos = recogerDatos();
+        const filasExportacion = obtenerDatosExportacion();
         const filas = [
             [
                 "Fecha",
+                "Dia",
                 "Entrada mañana",
                 "Salida mañana",
                 "Entrada tarde",
@@ -754,19 +921,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             ]
         ];
 
-        document.querySelectorAll("#tablaBody tr").forEach((fila, index) => {
-            const dato = datos[index] || {};
+        filasExportacion.forEach(fila => {
             filas.push([
-                dato.fecha || "",
-                dato.entradaM || "",
-                dato.salidaM || "",
-                dato.entradaT || "",
-                dato.salidaT || "",
-                fila.querySelector(".totalHoras")?.textContent || "0:00",
-                fila.querySelector(".horasExtras")?.textContent || "0:00",
-                dato.dieta || "0.00",
-                dato.pernocta || "0",
-                dato.observacion || ""
+                fila.fecha || "",
+                fila.dia || "",
+                fila.entradaM === "--" ? "" : fila.entradaM,
+                fila.salidaM === "--" ? "" : fila.salidaM,
+                fila.entradaT === "--" ? "" : fila.entradaT,
+                fila.salidaT === "--" ? "" : fila.salidaT,
+                fila.totalHoras || "0:00",
+                fila.horasExtras || "0:00",
+                fila.dieta || "0.00",
+                fila.pernocta || "0",
+                fila.observacion === "--" ? "" : fila.observacion
             ]);
         });
 

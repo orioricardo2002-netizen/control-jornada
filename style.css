@@ -503,7 +503,7 @@ textarea{
 }
 
 @page{
-    size:A4;
+    size:letter;
     margin:7mm;
 }
 
@@ -546,10 +546,7 @@ textarea{
     }
 
     .estadoGuardado{
-        display:inline-block;
-        margin:0.125rem 0 0.25rem;
-        padding:0.125rem 0.25rem;
-        font-size:0.5625rem;
+        display:none !important;
     }
 
     .tablaScroll{
