@@ -502,11 +502,18 @@ textarea{
     }
 }
 
+@page{
+    size:A4 landscape;
+    margin:8mm;
+}
+
 @media print{
     body{
         margin:0;
         background:white;
         color:black;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
     }
 
     .container{
@@ -546,9 +553,11 @@ textarea{
     }
 
     table{
+        width:100%;
         min-width:0;
         display:table;
-        font-size:0.5625rem;
+        table-layout:fixed;
+        font-size:0.5rem;
         page-break-inside:auto;
     }
 
@@ -562,8 +571,10 @@ textarea{
 
     th,
     td{
-        padding:0.1875rem;
+        padding:0.125rem;
         border:0.0625rem solid #999;
+        overflow:hidden;
+        vertical-align:middle;
     }
 
     input,
@@ -577,17 +588,72 @@ textarea{
         background:transparent;
     }
 
+    .celdaImpresion input,
+    .celdaImpresion textarea,
+    .celdaImpresion select{
+        display:none !important;
+    }
+
+    .celdaImpresion::after{
+        content:attr(data-print-value);
+        display:block;
+        min-height:0.75rem;
+        color:black;
+        white-space:pre-wrap;
+        overflow-wrap:anywhere;
+    }
+
+    td[data-label="Observaciones"]{
+        text-align:left;
+    }
+
     input[type="time"]{
-        width:2.625rem;
+        width:100%;
     }
 
     input[type="number"]{
-        width:2.375rem;
+        width:100%;
     }
 
     textarea{
         min-height:1.375rem;
         resize:none;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1){
+        width:7%;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3),
+    th:nth-child(4),
+    td:nth-child(4),
+    th:nth-child(5),
+    td:nth-child(5){
+        width:7%;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6),
+    th:nth-child(7),
+    td:nth-child(7){
+        width:5%;
+    }
+
+    th:nth-child(8),
+    td:nth-child(8),
+    th:nth-child(9),
+    td:nth-child(9){
+        width:5%;
+        min-width:0;
+    }
+
+    th:nth-child(10),
+    td:nth-child(10){
+        width:29%;
     }
 
     .totales{

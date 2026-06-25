@@ -70,8 +70,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     btnPdf.addEventListener("click", async () => {
         await guardarDatos(true);
+        prepararImpresion();
         window.print();
     });
+
+    window.addEventListener("beforeprint", prepararImpresion);
+    window.addEventListener("afterprint", limpiarImpresion);
 
     btnCsv.addEventListener("click", exportarCSV);
 
@@ -541,6 +545,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         configurarFila(fila);
         return fila;
+    }
+
+    function prepararImpresion() {
+        document.querySelectorAll("#tablaJornada tbody td").forEach(celda => {
+            const campo = celda.querySelector("input, textarea, select");
+
+            if (!campo) {
+                return;
+            }
+
+            const valor = campo.value.trim();
+            celda.dataset.printValue = valor || "--";
+            celda.classList.add("celdaImpresion");
+        });
+    }
+
+    function limpiarImpresion() {
+        document.querySelectorAll(".celdaImpresion").forEach(celda => {
+            delete celda.dataset.printValue;
+            celda.classList.remove("celdaImpresion");
+        });
     }
 
     function configurarFila(fila) {
