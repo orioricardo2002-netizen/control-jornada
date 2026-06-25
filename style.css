@@ -503,8 +503,8 @@ textarea{
 }
 
 @page{
-    size:A4 landscape;
-    margin:8mm;
+    size:A4;
+    margin:7mm;
 }
 
 @media print{
@@ -531,17 +531,25 @@ textarea{
     }
 
     h1{
-        font-size:1.125rem;
-        margin:0 0 0.375rem;
+        font-size:0.875rem;
+        margin:0 0 0.25rem;
     }
 
     .datosTrabajador{
-        margin-bottom:10px;
+        margin-bottom:0.375rem;
     }
 
     .datosTrabajador h2,
     .datosTrabajador p{
-        margin:3px 0;
+        margin:0.125rem 0;
+        font-size:0.75rem;
+    }
+
+    .estadoGuardado{
+        display:inline-block;
+        margin:0.125rem 0 0.25rem;
+        padding:0.125rem 0.25rem;
+        font-size:0.5625rem;
     }
 
     .tablaScroll{
@@ -557,7 +565,7 @@ textarea{
         min-width:0;
         display:table;
         table-layout:fixed;
-        font-size:0.5rem;
+        font-size:0.42rem;
         page-break-inside:auto;
     }
 
@@ -571,10 +579,15 @@ textarea{
 
     th,
     td{
-        padding:0.125rem;
+        padding:0.075rem;
         border:0.0625rem solid #999;
         overflow:hidden;
         vertical-align:middle;
+    }
+
+    th{
+        font-size:0.42rem;
+        line-height:1.05;
     }
 
     input,
@@ -583,7 +596,7 @@ textarea{
         min-height:0;
         padding:0;
         border:0;
-        font-size:0.5625rem;
+        font-size:0.42rem;
         color:black;
         background:transparent;
     }
@@ -597,10 +610,11 @@ textarea{
     .celdaImpresion::after{
         content:attr(data-print-value);
         display:block;
-        min-height:0.75rem;
+        min-height:0.55rem;
         color:black;
         white-space:pre-wrap;
         overflow-wrap:anywhere;
+        line-height:1.15;
     }
 
     td[data-label="Observaciones"]{
@@ -616,13 +630,13 @@ textarea{
     }
 
     textarea{
-        min-height:1.375rem;
+        min-height:1rem;
         resize:none;
     }
 
     th:nth-child(1),
     td:nth-child(1){
-        width:7%;
+        width:8.5%;
     }
 
     th:nth-child(2),
@@ -633,14 +647,14 @@ textarea{
     td:nth-child(4),
     th:nth-child(5),
     td:nth-child(5){
-        width:7%;
+        width:7.2%;
     }
 
     th:nth-child(6),
     td:nth-child(6),
     th:nth-child(7),
     td:nth-child(7){
-        width:5%;
+        width:5.4%;
     }
 
     th:nth-child(8),
@@ -653,13 +667,13 @@ textarea{
 
     th:nth-child(10),
     td:nth-child(10){
-        width:29%;
+        width:23.9%;
     }
 
     .totales{
-        margin-top:0.5rem;
-        padding-top:0.375rem;
+        margin-top:0.375rem;
+        padding-top:0.25rem;
         border-top:0.0625rem solid #999;
-        font-size:0.6875rem;
+        font-size:0.5625rem;
     }
 }
