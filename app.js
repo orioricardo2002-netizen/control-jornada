@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", async () => {
+﻿document.addEventListener("DOMContentLoaded", async () => {
     const SUPABASE_URL = "https://dpdlcrechuymojbdbtoi.supabase.co";
     const SUPABASE_KEY = "sb_publishable_hVtiEaNhrljcdvlwGVevQg_Dn1jn5pd";
     const supabaseClient = window.supabase
@@ -33,17 +33,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const STORAGE_JORNADAS = "jornadasPorPeriodo";
     const STORAGE_PERIODO_ACTIVO = "periodoActivo";
     const RETRASO_SINCRONIZACION_MS = 1500;
-    const PERFIL_PREDEFINIDO = {
-        email: "orioricardo2002@gmail.com",
-        nombre_completo: "Ricardo Orío Yangüela",
-        dni_nie: "16635902W"
-    };
     let periodoEnPantalla = "";
     let temporizadorSincronizacion = null;
     let hayCambiosLocalesPendientes = false;
     let cargaAutomaticaEnCurso = false;
 
-    // Inicializar desplegable de años dinámicamente
+    // Inicializar desplegable de aÃ±os dinÃ¡micamente
     inicializarSelectorAnios();
 
     btnAccionesMenu.addEventListener("click", () => {
@@ -157,7 +152,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function actualizarEstadoSesion() {
         if (!supabaseClient) {
-            authStatus.textContent = "Supabase no está disponible";
+            authStatus.textContent = "Supabase no estÃ¡ disponible";
             return null;
         }
 
@@ -165,8 +160,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const user = data.session?.user || null;
 
         authStatus.textContent = user
-            ? `Sesión iniciada: ${user.email}`
-            : "Sin iniciar sesión";
+            ? `SesiÃ³n iniciada: ${user.email}`
+            : "Sin iniciar sesiÃ³n";
 
         document.querySelector(".authPanel").classList.toggle("sesionActiva", Boolean(user));
         btnLogout.disabled = !user;
@@ -187,12 +182,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
     }
 
-    function obtenerPerfilPredefinido(email) {
-        return email?.toLowerCase() === PERFIL_PREDEFINIDO.email
-            ? PERFIL_PREDEFINIDO
-            : null;
-    }
-
     async function cargarPerfilUsuario(user) {
         if (!supabaseClient || !user) {
             pintarPerfil();
@@ -207,20 +196,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (error) {
             console.error("No se pudo cargar el perfil", error);
-            pintarPerfil(obtenerPerfilPredefinido(user.email));
+            pintarPerfil();
             return null;
         }
 
         if (data) {
             pintarPerfil(data);
             return data;
-        }
-
-        const perfilBase = obtenerPerfilPredefinido(user.email);
-        if (perfilBase) {
-            await guardarPerfilUsuario(user, perfilBase, false);
-            pintarPerfil(perfilBase);
-            return perfilBase;
         }
 
         pintarPerfil();
@@ -260,7 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const password = authPassword.value;
 
         if (!email || !password) {
-            alert("Introduce email y contraseña");
+            alert("Introduce email y contraseÃ±a");
             return;
         }
 
@@ -270,7 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (error) {
-            alert(`No se pudo iniciar sesión: ${error.message}`);
+            alert(`No se pudo iniciar sesiÃ³n: ${error.message}`);
             return;
         }
 
@@ -288,7 +270,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const perfil = obtenerPerfilFormulario();
 
         if (!email || !password || !perfil.nombre_completo || !perfil.dni_nie) {
-            alert("Introduce email, contraseña, nombre completo y DNI/NIE");
+            alert("Introduce email, contraseÃ±a, nombre completo y DNI/NIE");
             return;
         }
 
@@ -314,7 +296,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             await guardarPerfilUsuario(user, perfil);
         }
         actualizarEstadoGuardado("Cuenta creada", "nube");
-        alert("Cuenta creada. Si Supabase te envía un email de confirmación, confírmalo antes de entrar.");
+        alert("Cuenta creada. Si Supabase te envÃ­a un email de confirmaciÃ³n, confÃ­rmalo antes de entrar.");
     }
 
     async function cerrarSesion() {
@@ -330,8 +312,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         limpiarPantalla();
 
         alert(guardadoEnNube
-            ? "Datos guardados en la nube. Sesión cerrada."
-            : "Sesión cerrada.");
+            ? "Datos guardados en la nube. SesiÃ³n cerrada."
+            : "SesiÃ³n cerrada.");
     }
 
     async function limpiarPeriodo() {
@@ -342,7 +324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. Esta acción no se puede deshacer. ¿Continuar?`);
+        const confirmado = confirm(`Vas a borrar los datos del periodo ${periodo}. Esta acciÃ³n no se puede deshacer. Â¿Continuar?`);
 
         if (!confirmado) return;
 
@@ -513,12 +495,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${nombreDia(fecha)}
                     </small>
                 </td>
-                <td data-label="Entrada mañana">
-                    <input type="time" aria-label="Entrada mañana ${fechaFormateada}">
+                <td data-label="Entrada maÃ±ana">
+                    <input type="time" aria-label="Entrada maÃ±ana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
-                <td data-label="Salida mañana">
-                    <input type="time" aria-label="Salida mañana ${fechaFormateada}">
+                <td data-label="Salida maÃ±ana">
+                    <input type="time" aria-label="Salida maÃ±ana ${fechaFormateada}">
                     <button class="ahora" type="button">Ahora</button>
                 </td>
                 <td data-label="Entrada tarde">
@@ -909,8 +891,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             [
                 "Fecha",
                 "Dia",
-                "Entrada mañana",
-                "Salida mañana",
+                "Entrada maÃ±ana",
+                "Salida maÃ±ana",
                 "Entrada tarde",
                 "Salida tarde",
                 "Total horas",
@@ -938,7 +920,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         filas.push([]);
-        filas.push(["Total días trabajados", document.getElementById("totalDias").textContent]);
+        filas.push(["Total dÃ­as trabajados", document.getElementById("totalDias").textContent]);
         filas.push(["Total horas trabajadas", document.getElementById("totalHoras").textContent]);
         filas.push(["Total horas extras", document.getElementById("totalExtras").textContent]);
         filas.push(["Total dietas EUR", document.getElementById("totalDietas").textContent]);
